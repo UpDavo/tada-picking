@@ -6,15 +6,9 @@ app_name = 'dashboard'
 
 urlpatterns = [
     path('', DashboardIndexView.as_view(), name='index'),
-
-
-    # Staff
-    path('staff', StaffList.as_view(), name='staff'),
-    path('staff/<int:pk>/profile', StaffProfile.as_view(), name='staff_profile'),
     
     # Invoice
     path('invoices', InvoiceList.as_view(), name='invoices'),
-    path('invoices/<int:pk>/description', InvoiceDescription.as_view(), name='invoice_description'),
     
     # Invoice
     path('points', PointsList.as_view(), name='points'),

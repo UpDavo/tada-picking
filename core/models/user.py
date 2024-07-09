@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.db import models
 from .timeStampedModel import TimeStampedModel
 from .role import Role
+from .store import Store
 
 
 class User(AbstractUser, TimeStampedModel):
@@ -10,6 +11,8 @@ class User(AbstractUser, TimeStampedModel):
     ci = models.IntegerField(default=0)
     role = models.ForeignKey(
         Role, on_delete=models.CASCADE, null=True, blank=True)
+    store = models.ForeignKey(
+        Store, on_delete=models.PROTECT, null=True, blank=True)
     total_points = models.IntegerField(default=0)
 
     def has_permission(self, url_name):

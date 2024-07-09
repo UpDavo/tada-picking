@@ -35,7 +35,7 @@ class UsersList(TemplateView):
             self.request, name)
 
         context['nombre'] = "Usuarios"
-        context['key'] = 'user'
+        context['key'] = 'onlycreate'
         context['busqueda'] = "nombre de usuario"
         context['fields'] = fields
         context['object_data'] = object_data

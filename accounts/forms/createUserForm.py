@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import password_validation
-from core.models import User, Role
+from core.models import User, Role, Store
 from core.services.users_service import UsersService
 
 
@@ -21,6 +21,13 @@ class CreateUserForm(UserCreationForm):
     role = forms.ModelChoiceField(
         label='Rol',
         queryset=Role.objects.all(),
+        widget=forms.Select(
+            attrs={'class': 'select select-bordered select-primary w-full rounded'}),
+    )
+    
+    store = forms.ModelChoiceField(
+        label='Tienda',
+        queryset=Store.objects.all(),
         widget=forms.Select(
             attrs={'class': 'select select-bordered select-primary w-full rounded'}),
     )

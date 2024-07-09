@@ -1,5 +1,5 @@
 from django import forms
-from core.models import User, Role
+from core.models import User, Role, Store
 
 
 class UpdateUserForm(forms.ModelForm):
@@ -13,6 +13,12 @@ class UpdateUserForm(forms.ModelForm):
     role = forms.ModelChoiceField(
         label='Rol',
         queryset=Role.objects.all(),
+        widget=forms.Select(
+            attrs={'class': 'select select-bordered select-primary w-full rounded'}),
+    )
+    store = forms.ModelChoiceField(
+        label='Tienda',
+        queryset=Store.objects.all(),
         widget=forms.Select(
             attrs={'class': 'select select-bordered select-primary w-full rounded'}),
     )

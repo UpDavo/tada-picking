@@ -38,7 +38,7 @@ class RoleList(TemplateView):
         # Pasar los datos de los objetos y los campos al contexto
         context['nombre'] = "Roles"
         context['busqueda'] = "nombre de rol"
-        context['key'] = "roles"
+        context['key'] = "onlycreate"
         context['fields'] = fields
         context['object_data'] = object_data
         context['page_obj'] = page_obj

@@ -32,8 +32,8 @@ def generate_drawer(request, user):
                     "active": is_active(request, ['dashboard'])
                 },
                 {
-                    "name": "Facturas",
-                    "icon": "fas fa-file-invoice",
+                    "name": "Picking",
+                    "icon": "fas fa-boxes",
                     "href": reverse('dashboard:invoices'),
                     "href_native": ['dashboard:invoices'],
                     "active": is_active(request, ['invoices']),
@@ -51,8 +51,8 @@ def generate_drawer(request, user):
                     "active": is_active(request, ['points']),
                 },
                 {
-                    "name": "Productos",
-                    "icon": "far fa-clock",
+                    "name": "Cupones",
+                    "icon": "fas fa-gift",
                     "href": reverse('dashboard:products'),
                     "href_native": ['dashboard:products'],
                     "active": is_active(request, ['products']),
@@ -61,7 +61,7 @@ def generate_drawer(request, user):
                     "name": "Stock",
                     "href": reverse('dashboard:stocks'),
                     "href_native": ['dashboard:stocks'],
-                    "icon": "fas fa-chart-bar",
+                    "icon": "fas fa-warehouse",
                     "active": is_active(request, ['stocks'])
                 },
                 {
