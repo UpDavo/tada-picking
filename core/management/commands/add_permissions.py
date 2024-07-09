@@ -11,9 +11,11 @@ class Command(BaseCommand):
             ('Inventario', 'dashboard:stocks'),
             ('Usuarios', 'dashboard:users'),
             ('Roles', 'dashboard:roles'),
-            ('Productos', 'dashboard:products'),
+            ('Cupones', 'dashboard:products'),
             ('Puntos', 'dashboard:points'),
             ('Facturas', 'dashboard:invoices'),
+            ('Tiendas', 'dashboard:stores'),
+            ('Ciudades', 'dashboard:cities'),
         ]
 
         for name, url_name in url_tuples:

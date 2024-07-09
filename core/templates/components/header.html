@@ -8,7 +8,9 @@
     </div>
     <div class="flex-none gap-1">
       {% comment %} <h2 class="pr-2 font-bold uppercase">Puntos totales: {{ request.user.total_points }}</h2> {% endcomment %}
-      <h2 class="pr-2 font-bold uppercase">{{ request.user.names }}</h2>
+      <div class="hidden md:block">
+        <h2 class="pr-2 font-bold uppercase">{{ request.user.names }}</h2>
+      </div>
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder online">
           <div class="w-10 rounded-full ring ring-secondary ring-offset-base-100 ring-offset-2">

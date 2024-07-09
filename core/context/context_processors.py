@@ -43,26 +43,60 @@ def generate_drawer(request, user):
         {
             'section': 'Configuración',
             'childs': [
+                # {
+                #     "name": "Puntos",
+                #     "icon": "fas fa-coins",
+                #     "href": reverse('dashboard:points'),
+                #     "href_native": ['dashboard:points'],
+                #     "active": is_active(request, ['points']),
+                # },
                 {
-                    "name": "Puntos",
-                    "icon": "fas fa-coins",
-                    "href": reverse('dashboard:points'),
-                    "href_native": ['dashboard:points'],
-                    "active": is_active(request, ['points']),
+                    "name": "Configuración de tiendas",
+                    "icon": "fas fa-shopping-bag",
+                    "href_native": ['dashboard:cities',
+                                    'dashboard:stores'],
+                    "active": is_active(request, ['cities',
+                                                  'stores']),
+                    "children": [
+                        {
+                            "name": "Tiendas",
+                            "icon": "fas fa-store",
+                            "href": reverse('dashboard:stores'),
+                            "href_native": ['dashboard:stores'],
+                            "active": is_active(request, ['stores']),
+                        },
+                        {
+                            "name": "Ciudades",
+                            "href": reverse('dashboard:cities'),
+                            "href_native": ['dashboard:cities'],
+                            "icon": "fas fa-city",
+                            "active": is_active(request, ['cities'])
+                        }
+                    ]
                 },
                 {
-                    "name": "Cupones",
-                    "icon": "fas fa-gift",
-                    "href": reverse('dashboard:products'),
-                    "href_native": ['dashboard:products'],
-                    "active": is_active(request, ['products']),
-                },
-                {
-                    "name": "Stock",
-                    "href": reverse('dashboard:stocks'),
-                    "href_native": ['dashboard:stocks'],
-                    "icon": "fas fa-warehouse",
-                    "active": is_active(request, ['stocks'])
+                    "name": "Items a Usuarios",
+                    "icon": "fas fa-box-open",
+                    "href_native": ['dashboard:products',
+                                    'dashboard:stocks'],
+                    "active": is_active(request, ['products',
+                                                  'stocks']),
+                    "children": [
+                        {
+                            "name": "Cupones",
+                            "icon": "fas fa-gift",
+                            "href": reverse('dashboard:products'),
+                            "href_native": ['dashboard:products'],
+                            "active": is_active(request, ['products']),
+                        },
+                        {
+                            "name": "Stock",
+                            "href": reverse('dashboard:stocks'),
+                            "href_native": ['dashboard:stocks'],
+                            "icon": "fas fa-warehouse",
+                            "active": is_active(request, ['stocks'])
+                        }
+                    ]
                 },
                 {
                     "name": "Accesos",

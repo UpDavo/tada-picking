@@ -5,3 +5,5 @@ from .stockViews import *
 from .roleViews import *
 from .invoiceViews import *
 from .pointsViews import *
+from .storeViews import *
+from .cityViews import *

@@ -26,6 +26,18 @@ urlpatterns = [
     path('roles/create', CreateRole.as_view(), name='role_create'),
     path('roles/<int:pk>/edit/', EditRole.as_view(), name='role_edit'),
     path('roles/<int:pk>/delete/', DeleteRole.as_view(), name='role_delete'),
+    
+    # Stores
+    path('stores', StoreList.as_view(), name='stores'),
+    path('stores/create', CreateStore.as_view(), name='store_create'),
+    path('stores/<int:pk>/edit/', EditStore.as_view(), name='store_edit'),
+    path('stores/<int:pk>/delete/', DeleteStore.as_view(), name='store_delete'),
+    
+    # Cities
+    path('cities', CityList.as_view(), name='cities'),
+    path('cities/create', CreateCity.as_view(), name='citi_create'),
+    path('cities/<int:pk>/edit/', EditCity.as_view(), name='citi_edit'),
+    path('cities/<int:pk>/delete/', DeleteCity.as_view(), name='citi_delete'),
 
     # Products
     path('products', ProductList.as_view(), name='products'),
