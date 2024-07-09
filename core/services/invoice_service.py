@@ -15,7 +15,7 @@ class InvoiceService:
         # Obtener los campos del modelo Pais
         fields = Invoice._meta.fields
         fields_to_include = ['id', 'created_at',
-                             'user', 'order_id', 'product_name']
+                             'store', 'order_id', 'status']
         fields = [field for field in fields if field.name in fields_to_include]
 
         # Paginar los horarios
@@ -25,7 +25,8 @@ class InvoiceService:
 
         # Definir la URL de edición
         list_url = 'dashboard:invoices'
-        description_url = 'dashboard:invoice_description'
+        description_url = 'dashboard:invoice_edit'
+        view_url = 'dashboard:invoice_view'
 
         # Obtener los valores de los campos para cada objeto
         object_data = []
@@ -33,7 +34,7 @@ class InvoiceService:
             obj_data = [getattr(obj, field.name) for field in fields]
             object_data.append(obj_data)
 
-        return page_obj, fields, object_data, list_url, description_url
+        return page_obj, fields, object_data, list_url, description_url, view_url
 
     @staticmethod
     def checkExists(order_id):

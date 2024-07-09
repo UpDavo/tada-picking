@@ -3,7 +3,6 @@
 
 <div class="overflow-x-auto rounded-md shadow-md">
   <table class="table table-zebra">
-    
     <thead class="bg-primary text-white uppercase">
       <tr>
         {% for field in fields|slice:'1:' %}
@@ -16,19 +15,33 @@
       <!-- Iterar sobre los objetos -->
       {% for obj_data in object_data %}
         <tr class="hover">
-          {% for value in obj_data|slice:'1:' %}
-            <!-- Aquí se salta el primer elemento -->
-            {% if forloop.counter0 == 0 %}
-              <td class="uppercase font-bold">
-                {{ value|date:'d/m/Y' }} <!-- Formatear como dd/mm/aaaa -->
-              </td>
+          <td class="uppercase font-bold">
+            {{ obj_data.1|date:'d/m/Y' }} <!-- Formatear como dd/mm/aaaa -->
+          </td>
+          <td class="uppercase">{{ obj_data.2 }}</td>
+          <td class="uppercase">{{ obj_data.3 }}</td>
+          <td class="uppercase">
+            {% if obj_data.4 == 'approved' %}
+              <div class="badge badge-accent bg-emerald-500 border-emerald-500 text-white">Aprobado</div>
             {% else %}
-              <td class="uppercase">{{ value }}</td>
+              {% if obj_data.4 == 'awaiting_approval' %}
+                <div class="badge badge-accent">Esperando Aprobación</div>
+              {% else %}
+                <div class="badge badge-primary bg-emerald-500 border-emerald-500 text-white">Aprobado pero Incompleto</div>
+              {% endif %}
             {% endif %}
-          {% endfor %}
+          </td>
           <td>
             <div class="flex justify-start gap-1">
-              <a href="{% url 'dashboard:description_url' pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i></a>
+              {% if obj_data.4 == 'approved' %}
+                <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i>Ver Picking</a>
+              {% else %}
+                {% if obj_data.4 == 'awaiting_approval' %}
+                  <a href="{% url description_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-pen"></i>Actualizar Estado</a>
+                {% else %}
+                  <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-check"></i>Ver Picking</a>
+                {% endif %}
+              {% endif %}
             </div>
           </td>
         </tr>

@@ -11,7 +11,7 @@ class CreateRoleForm(forms.ModelForm):
 
     class Meta:
         model = Role
-        fields = ['name', 'permissions']
+        fields = ['name','all_countries', 'permissions']
         labels = {
             'name': 'Nombre del rol',
             'permissions': 'Permisos',

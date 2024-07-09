@@ -13,7 +13,7 @@ class Command(BaseCommand):
             ('Roles', 'dashboard:roles'),
             ('Cupones', 'dashboard:products'),
             ('Puntos', 'dashboard:points'),
-            ('Facturas', 'dashboard:invoices'),
+            ('Picking', 'dashboard:invoices'),
             ('Tiendas', 'dashboard:stores'),
             ('Ciudades', 'dashboard:cities'),
         ]

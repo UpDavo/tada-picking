@@ -20,7 +20,7 @@ class CreateStoreForm(forms.ModelForm):
                 'placeholder': 'Nombre de la Tienda'
             }),
             'city': forms.Select(attrs={
-                'class': 'input input-bordered input-primary w-full rounded', 
+                'class': 'select select-bordered select-primary w-full rounded', 
                 'placeholder': 'Ciudad'
             }),
         }
