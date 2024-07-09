@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, View, UpdateView
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
-from dashboard.forms import CreateRoleForm
-from core.services.role_service import RoleService
+from dashboard.forms import CreateStoreForm
+from core.services.store_service import StoreService
 from django.conf import settings
 
 PERMISSION = 'dashboard:stores'
@@ -27,17 +27,13 @@ class StoreList(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        roleService = RoleService()
+        name = self.request.GET.get('names')
 
-        name = self.request.GET.get('name')
-
-        page_obj, fields, object_data, edit_url, delete_url, create_url, list_url = roleService.getRoleList(
+        page_obj, fields, object_data, edit_url, delete_url, create_url, list_url = StoreService.getList(
             self.request, name)
 
-       # Pasar los datos de los objetos y los campos al contexto
-        # Pasar los datos de los objetos y los campos al contexto
-        context['nombre'] = "Roles"
-        context['busqueda'] = "nombre de rol"
+        context['nombre'] = "Tiendas"
+        context['busqueda'] = "nombre de la tienda"
         context['key'] = "onlycreate"
         context['fields'] = fields
         context['object_data'] = object_data
@@ -65,22 +61,17 @@ class DeleteStore(View):
                 return HttpResponseRedirect(reverse_lazy(settings.NOT_ALLOWED))
 
     def post(self, request, pk):
-        roleService = RoleService()
-        model = roleService.getModel()
-        # Obtener el país a eliminar
-        role = get_object_or_404(model, pk=pk)
-        # Eliminar el país
-        role.delete()
-        # Redirigir a la página de lista de países después de la eliminación
-        return redirect('dashboard:roles')
+        model = StoreService.getModel()
+        item = get_object_or_404(model, pk=pk)
+        item.delete()
+        return redirect('dashboard:stores')
 
 
 class EditStore(UpdateView):
-    template_name = 'components/roles/generic_checkbox_edit.html'
-    form_class = CreateRoleForm
-    roleService = RoleService()
-    model = roleService.getModel()
-    success_url = reverse_lazy('dashboard:roles')
+    template_name = 'components/generic/generic_edit.html'
+    form_class = CreateStoreForm
+    model = StoreService.getModel()
+    success_url = reverse_lazy('dashboard:stores')
 
     def dispatch(self, request, *args, **kwargs):
         if settings.LOCAL:
@@ -96,12 +87,13 @@ class EditStore(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = "Editar Rol"  # Puedes ajustar el nombre aquí
+        context['nombre'] = "Editar Tienda"
+        # context['key'] = "user"
         return context
 
 
 class CreateStore(TemplateView):
-    template_name = 'components/roles/generic_checkbox_create.html'
+    template_name = 'components/generic/generic_create.html'
 
     def dispatch(self, request, *args, **kwargs):
         if settings.LOCAL:
@@ -116,13 +108,14 @@ class CreateStore(TemplateView):
                 return HttpResponseRedirect(reverse_lazy(settings.NOT_ALLOWED))
 
     def get(self, request, *args, **kwargs):
-        form = CreateRoleForm()
-        return render(request, self.template_name, {'form': form, 'nombre': 'Crear un Rol'})
+        form = CreateStoreForm()
+        return render(request, self.template_name, {'form': form, 'nombre': 'Crear una Tienda', 'key': 'store'})
 
     def post(self, request, *args, **kwargs):
-        form = CreateRoleForm(request.POST)
+        form = CreateStoreForm(request.POST)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse_lazy('dashboard:roles'))
+            user = form.save(commit=False)
+            user.save()
+            return HttpResponseRedirect(reverse_lazy('dashboard:stores'))
         else:
-            return render(request, self.template_name, {'form': form, 'nombre': 'Crear un Rol'})
+            return render(request, self.template_name, {'form': form, 'nombre': 'Crear una Tienda'})

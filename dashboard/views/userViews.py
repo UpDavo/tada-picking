@@ -125,7 +125,7 @@ class CreateUser(TemplateView):
             user.save()
             return HttpResponseRedirect(reverse_lazy('dashboard:users'))
         else:
-            return render(request, self.template_name, {'form': form, 'nombre': 'Crear un País'})
+            return render(request, self.template_name, {'form': form, 'nombre': 'Crear un Usuario'})
 
 
 @csrf_exempt

@@ -20,7 +20,7 @@ class ProductService:
         # Obtener los campos del modelo Pais
         fields = Product._meta.fields
         fields_to_include = ['id', 'created_at',
-                             'image', 'name', 'sku', 'active']
+                              'name', 'sku', 'active']
         fields = [field for field in fields if field.name in fields_to_include]
 
         # Paginar los horarios

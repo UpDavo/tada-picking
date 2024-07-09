@@ -35,9 +35,9 @@ urlpatterns = [
     
     # Cities
     path('cities', CityList.as_view(), name='cities'),
-    path('cities/create', CreateCity.as_view(), name='citi_create'),
-    path('cities/<int:pk>/edit/', EditCity.as_view(), name='citi_edit'),
-    path('cities/<int:pk>/delete/', DeleteCity.as_view(), name='citi_delete'),
+    path('cities/create', CreateCity.as_view(), name='city_create'),
+    path('cities/<int:pk>/edit/', EditCity.as_view(), name='city_edit'),
+    path('cities/<int:pk>/delete/', DeleteCity.as_view(), name='city_delete'),
 
     # Products
     path('products', ProductList.as_view(), name='products'),

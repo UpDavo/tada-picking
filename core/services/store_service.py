@@ -1,21 +1,21 @@
 from django.core.paginator import Paginator
-from core.models import City
+from core.models import Store
 # from django.urls import reverse_lazy
 
 
-class CityService:
+class StoreService:
     
     @staticmethod
     def getList(request, name):
         # Obtener todos los usuarios
-        items = City.objects.order_by('created_at').all()
+        items = Store.objects.order_by('created_at').all()
 
         if name:
             items = items.filter(name__icontains=name)
 
         # Obtener los campos del modelo Usuario como una lista de objetos Field
-        fields = City._meta.fields
-        fields_to_include = ['id', 'created_at','name']
+        fields = Store._meta.fields
+        fields_to_include = ['id', 'created_at','name', 'city']
         fields = [field for field in fields if field.name in fields_to_include]
 
         # Paginar los usuarios
@@ -23,10 +23,10 @@ class CityService:
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
-        list_url = 'dashboard:cities'
-        edit_url = 'dashboard:city_edit'
-        delete_url = 'dashboard:city_delete'
-        create_url = 'dashboard:city_create'
+        list_url = 'dashboard:stores'
+        edit_url = 'dashboard:store_edit'
+        delete_url = 'dashboard:store_delete'
+        create_url = 'dashboard:store_create'
 
         # Obtener los valores de los campos para cada usuario
         object_data = []
@@ -38,13 +38,13 @@ class CityService:
 
     @staticmethod
     def checkExists(item):
-        exists = City.objects.filter(name=item).exists()
+        exists = Store.objects.filter(name=item).exists()
         return exists
 
     @staticmethod
     def getModel():
-        return City
+        return Store
 
     @staticmethod
-    def getAllCities():
-        return City.objects.all()
+    def getAllItems():
+        return Store.objects.all()
