@@ -9,6 +9,7 @@ urlpatterns = [
     
     # Invoice
     path('invoices', InvoiceList.as_view(), name='invoices'),
+    path('invoices/download/', DownloadExcel.as_view(), name='invoice_download_excel'),
     path('invoices/<int:pk>/edit/', UpdateInvoice.as_view(), name='invoice_edit'),
     path('invoices/<int:pk>/view/', ViewInvoice.as_view(), name='invoice_view'),
     

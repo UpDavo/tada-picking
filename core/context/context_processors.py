@@ -22,7 +22,7 @@ def has_permission(user, view_names):
 def generate_drawer(request, user):
     drawer = [
         {
-            'section': 'Productos',
+            'section': 'Picking',
             'childs': [
                 {
                     "name": "Dashboard",

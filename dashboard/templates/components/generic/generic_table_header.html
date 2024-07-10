@@ -36,5 +36,14 @@
         </a>
       </div>
     {% endif %}
+
+    {% if key == 'downloadTable' %}
+      <div>
+        <a href="{% url 'dashboard:invoice_download_excel' %}" class="btn btn-primary btn-sm py-3 h-auto">
+          <i class="fas fa-download"></i>
+          Descargar Excel
+        </a>
+      </div>
+    {% endif %}
   </div>
 </div>

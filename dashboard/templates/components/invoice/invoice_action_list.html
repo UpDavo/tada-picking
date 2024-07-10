@@ -37,7 +37,7 @@
                 <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i>Ver Picking</a>
               {% else %}
                 {% if obj_data.4 == 'awaiting_approval' %}
-                  <a href="{% url description_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-pen"></i>Actualizar Estado</a>
+                  <a href="javascript:void(0);" onclick="confirmUpdateState('{% url description_url pk=obj_data.0 %}')" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-pen"></i>Actualizar Estado</a>
                 {% else %}
                   <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i>Ver Picking</a>
                 {% endif %}
@@ -82,7 +82,7 @@
             <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i> Ver Picking</a>
           {% else %}
             {% if obj_data.4 == 'awaiting_approval' %}
-              <a href="{% url description_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-pen"></i> Actualizar Estado</a>
+              <a href="javascript:void(0);" onclick="confirmUpdateState('{% url description_url pk=obj_data.0 %}')" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-pen"></i> Actualizar Estado</a>
             {% else %}
               <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i> Ver Picking</a>
             {% endif %}
@@ -92,5 +92,23 @@
     </div>
   {% endfor %}
 </div>
+<script>
+  function confirmUpdateState(url) {
+      Swal.fire({
+          title: '¿Estás seguro?',
+          text: "Una vez actualizado el estado, no se puede volver a cambiar. Por favor, asegúrate de que los cambios son correctos.",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#5f3ea8',
+          cancelButtonColor: '#e39424',
+          confirmButtonText: 'Sí, continuar',
+          cancelButtonText: 'Cancelar'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              window.location.href = url;
+          }
+      });
+  }
+  </script>
 
 {% include 'components/paginator.html' %}

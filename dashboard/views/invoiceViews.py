@@ -1,13 +1,18 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, UpdateView
+from django.views.generic import TemplateView, UpdateView, View
 from django.shortcuts import HttpResponseRedirect
 from core.services.invoice_service import InvoiceService
 from django.conf import settings
 from dashboard.forms import CreateInvoiceForm, ViewInvoiceForm
 import json
+from django.http import HttpResponse
+import pandas as pd
+import io
+from django.utils.decorators import method_decorator
 
 PERMISSION = 'dashboard:invoices'
+
 
 
 class InvoiceList(TemplateView):
@@ -28,7 +33,7 @@ class InvoiceList(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        name = self.request.GET.get('name')
+        name = self.request.GET.get('names')
 
         page_obj, fields, object_data, list_url, description_url, view_url = InvoiceService.getInvoiceList(
             self.request, name)
@@ -36,8 +41,8 @@ class InvoiceList(TemplateView):
         # Pasar los datos de los objetos y los campos al contexto
         context['nombre'] = "Picking"
         context['busqueda'] = "número de orden"
+        context['key'] = "downloadTable"
         context['fields'] = fields
-        # context['delete_url'] = 'dashboard:invoice_description'
         context['object_data'] = object_data
         context['page_obj'] = page_obj
         context['description_url'] = description_url
@@ -45,6 +50,24 @@ class InvoiceList(TemplateView):
         context['list_url'] = list_url
 
         return context
+
+@method_decorator(login_required, name='dispatch')
+class DownloadExcel(View):
+
+    def get(self, request, *args, **kwargs):
+        df = InvoiceService.get_excel_data(self.request, order_id=request.GET.get('names'))
+        
+        # Crear un archivo Excel en memoria
+        excel_buffer = io.BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False)
+
+        # Obtener el contenido del archivo Excel
+        excel_buffer.seek(0)
+        response = HttpResponse(excel_buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=invoices.xlsx'
+        return response
+
     
     
 class UpdateInvoice(UpdateView):
