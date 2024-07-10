@@ -131,4 +131,4 @@ node_modules/
 local-cdn/
 .venv
 /venv/
-.env
+*/*.env
