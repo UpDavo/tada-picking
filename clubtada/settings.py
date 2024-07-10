@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from environ import Env
 
-load_dotenv()
+env = Env()
+Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,17 +13,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'django-insecure-892+#0ln#pl$d0c^vzdr))($43p@-x4&-zt-e51hhj&4qn&76%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-if os.getenv('PROD') == 'True':
+if env.str('PROD') == 'True':
     DEBUG = False
 
 
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
-
+X_FRAME_OPTIONS = 'ALLOWALL'
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
@@ -37,6 +39,7 @@ INSTALLED_APPS = [
     'dashboard',
     'store',
     'accounts',
+    'corsheaders',
     'livereload',
 ]
 
@@ -77,23 +80,23 @@ WSGI_APPLICATION = 'clubtada.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':  os.getenv('DATABASE_NAME_LOCAL'),
-        'USER':  os.getenv('DATABASE_USER_LOCAL'),
-        'PASSWORD':  os.getenv('DATABASE_PASSWORD_LOCAL'),
-        'HOST':  os.getenv('DATABASE_HOST_LOCAL'),
+        'NAME':  env.str('DATABASE_NAME_LOCAL'),
+        'USER':  env.str('DATABASE_USER_LOCAL'),
+        'PASSWORD':  env.str('DATABASE_PASSWORD_LOCAL'),
+        'HOST':  env.str('DATABASE_HOST_LOCAL'),
         'PORT': '',
     }
 }
 
-if os.getenv('PROD') == 'True':
+if env.str('PROD') == 'True':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DATABASE_NAME'),
-            'USER': os.getenv('DATABASE_USER'),
-            'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-            'HOST': os.getenv('DATABASE_HOST'),
-            'PORT': os.getenv('DATABASE_PORT'),
+            'NAME': env.str('DATABASE_NAME'),
+            'USER': env.str('DATABASE_USER'),
+            'PASSWORD': env.str('DATABASE_PASSWORD'),
+            'HOST': env.str('DATABASE_HOST'),
+            'PORT': env.str('DATABASE_PORT'),
         }
     }
 
@@ -154,9 +157,9 @@ LOGIN = 'accounts:login'
 NOT_ALLOWED = 'dashboard:notAllowed'
 
 # S3 Config
-# AWS_ACCESS_KEY_ID = CONFIG.get('aws', 'AWS_ACCESS_KEY_ID')
-# AWS_SECRET_ACCESS_KEY = CONFIG.get('aws', 'AWS_SECRET_ACCESS_KEY')
-# AWS_STORAGE_BUCKET_NAME = CONFIG.get('aws', 'AWS_STORAGE_BUCKET_NAME')
+# AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
 # #
 # EMAIL_SUBJECT_PREFIX = "[Development] -"
 # EMAIL_HOST = 'localhost'
@@ -166,12 +169,12 @@ NOT_ALLOWED = 'dashboard:notAllowed'
 # EMAIL_USE_TLS = False
 
 # EMAIL_SUBJECT_PREFIX = "[Desarrollo] -"
-# EMAIL_HOST = CONFIG.get('smtp', 'EMAIL_HOST')
-# EMAIL_HOST_USER = CONFIG.get('smtp', 'EMAIL_HOST_USER')
-# DEFAULT_FROM_EMAIL = CONFIG.get('smtp', 'DEFAULT_FROM_EMAIL')
-# EMAIL_HOST_PASSWORD = CONFIG.get('smtp', 'EMAIL_HOST_PASSWORD')
-# EMAIL_PORT = CONFIG.get('smtp', 'EMAIL_PORT')
-# EMAIL_USE_SSL = CONFIG.get('smtp', 'EMAIL_USE_SSL')
+# EMAIL_HOST = env('EMAIL_HOST')
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+# EMAIL_PORT = env('EMAIL_PORT')
+# EMAIL_USE_SSL = env('EMAIL_USE_SSL')
 
 # SIMPLE_HISTORY_HISTORY_CHANGE_REASON_USE_TEXT_FIELD = True
 
