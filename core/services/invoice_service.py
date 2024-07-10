@@ -7,7 +7,7 @@ class InvoiceService:
     def getInvoiceList(request, order_id):
 
         # Obtener todos los horarios del usuario actual
-        invoices = Invoice.objects.order_by('created_at').all()
+        invoices = Invoice.objects.filter(store=request.user.store).order_by('created_at')
 
         if order_id:
             invoices = invoices.filter(order_id__icontains=order_id)

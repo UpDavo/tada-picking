@@ -25,6 +25,9 @@ class Invoice(TimeStampedModel):
     # Botellas
     bottles = JSONField(default=dict)
     
+    # Foto del Producto
+    product_photo = models.ImageField(upload_to='product_photos/', blank=True, null=True)
+    
     # Detalles de Aprobación
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='awaiting_approval')
     approval_comment = models.TextField(blank=True, null=True)

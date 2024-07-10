@@ -1,7 +1,7 @@
 {% include 'components/filters/ui_filters/user_ui_filters.html' %}
 {% load static %}
 
-<div class="overflow-x-auto rounded-md shadow-md">
+<div class="overflow-x-auto rounded-md shadow-md md:block hidden">
   <table class="table table-zebra">
     <thead class="bg-primary text-white uppercase">
       <tr>
@@ -22,12 +22,12 @@
           <td class="uppercase">{{ obj_data.3 }}</td>
           <td class="uppercase">
             {% if obj_data.4 == 'approved' %}
-              <div class="badge badge-accent bg-emerald-500 border-emerald-500 text-white">Aprobado</div>
+              <div class="badge bg-emerald-500 border-emerald-500 text-white">Aprobado</div>
             {% else %}
               {% if obj_data.4 == 'awaiting_approval' %}
                 <div class="badge badge-accent">Esperando Aprobación</div>
               {% else %}
-                <div class="badge badge-primary bg-emerald-500 border-emerald-500 text-white">Aprobado pero Incompleto</div>
+                <div class="badge bg-emerald-500 border-emerald-500 text-white">Aprobado pero Incompleto</div>
               {% endif %}
             {% endif %}
           </td>
@@ -39,7 +39,7 @@
                 {% if obj_data.4 == 'awaiting_approval' %}
                   <a href="{% url description_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-pen"></i>Actualizar Estado</a>
                 {% else %}
-                  <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-check"></i>Ver Picking</a>
+                  <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i>Ver Picking</a>
                 {% endif %}
               {% endif %}
             </div>
@@ -57,6 +57,40 @@
       </tr>
     </tfoot>
   </table>
+</div>
+
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:hidden">
+  {% for obj_data in object_data %}
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <h2 class="card-title">{{ obj_data.1|date:'d/m/Y' }}</h2>
+        <p class="uppercase">{{ obj_data.2 }}</p>
+        <p class="uppercase">{{ obj_data.3 }}</p>
+        <div>
+          {% if obj_data.4 == 'approved' %}
+            <div class="badge badge-md bg-emerald-500 border-emerald-500 text-white">Aprobado</div>
+          {% else %}
+            {% if obj_data.4 == 'awaiting_approval' %}
+              <div class="badge badge-md badge-accent">Esperando Aprobación</div>
+            {% else %}
+              <div class="badge badge-md bg-emerald-500 border-emerald-500 text-white">Aprobado pero Incompleto</div>
+            {% endif %}
+          {% endif %}
+        </div>
+        <div class="card-actions justify-start mt-2">
+          {% if obj_data.4 == 'approved' %}
+            <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i> Ver Picking</a>
+          {% else %}
+            {% if obj_data.4 == 'awaiting_approval' %}
+              <a href="{% url description_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-pen"></i> Actualizar Estado</a>
+            {% else %}
+              <a href="{% url view_url pk=obj_data.0 %}" class="btn btn-primary btn-xs btn-outline"><i class="fas fa-eye"></i> Ver Picking</a>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
 </div>
 
 {% include 'components/paginator.html' %}

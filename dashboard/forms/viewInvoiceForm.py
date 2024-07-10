@@ -5,14 +5,16 @@ import json
 class ViewInvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['status', 'approval_comment']
+        fields = ['status', 'approval_comment', 'product_photo']
         labels = {
             'status': 'Estado',
             'approval_comment': 'Comentario de Aprobación',
+            'product_photo': 'Foto del Producto',
         }
         widgets = {
             'status': forms.Select(attrs={'class': 'select select-bordered select-primary w-full rounded', 'disabled': 'disabled'}),
             'approval_comment': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Comentario de aprobación', 'disabled': 'disabled'}),
+            'product_photo': forms.ClearableFileInput(attrs={'class': 'file-input file-input-bordered file-input-primary w-full rounded', 'disabled': 'disabled'}),
         }
 
     def __init__(self, *args, **kwargs):

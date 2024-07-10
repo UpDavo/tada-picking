@@ -48,7 +48,7 @@ class InvoiceList(TemplateView):
     
     
 class UpdateInvoice(UpdateView):
-    template_name = 'components/generic/generic_edit.html'
+    template_name = 'components/generic/generic_edit_invoice.html'
     form_class = CreateInvoiceForm
     model = InvoiceService.getModel()
     success_url = reverse_lazy('dashboard:invoices')
@@ -85,7 +85,7 @@ class UpdateInvoice(UpdateView):
     
     
 class ViewInvoice(UpdateView):
-    template_name = 'components/generic/generic_edit.html'
+    template_name = 'components/generic/generic_edit_invoice.html'
     form_class = ViewInvoiceForm
     model = InvoiceService.getModel()
     success_url = reverse_lazy('dashboard:invoices')
@@ -104,7 +104,7 @@ class ViewInvoice(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = "Actualizar Picking"
+        context['nombre'] = "Visualizar Picking"
         context['disabled_save'] = True
         return context
 

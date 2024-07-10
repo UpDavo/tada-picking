@@ -9,7 +9,7 @@ class Command(BaseCommand):
         store = Store.objects.first()
 
         Invoice.objects.create(
-            order_id="ORD122333",
+            order_id="OR122333",
             store=store,
             picker_name="John Doe",
             picker_ci=123456789,
