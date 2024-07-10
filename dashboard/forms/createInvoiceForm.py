@@ -5,15 +5,17 @@ import json
 class CreateInvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['status', 'approval_comment', 'product_photo']
+        fields = ['status', 'approval_comment', 'product_photo', 'description']
         labels = {
             'status': 'Estado',
             'approval_comment': 'Comentario de Aprobación',
             'product_photo': 'Foto del Producto',
+            'description': 'Comentario del Motorizado',
         }
         widgets = {
             'status': forms.Select(attrs={'class': 'select select-bordered select-primary w-full rounded'}),
             'approval_comment': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Comentario de aprobación'}),
+            'description': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Comentario de aprobación', 'disabled':'disabled'}),
             'product_photo': forms.ClearableFileInput(attrs={'class': 'file-input file-input-bordered file-input-primary w-full rounded'}),
         }
 

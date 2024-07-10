@@ -1,0 +1,138 @@
+{% extends 'layout/dashboard_layout.html' %}
+
+{% block content %}
+  <div class="container">
+    {% if messages %}
+      <div class="mb-4">
+        {% for message in messages %}
+          <div class="alert alert-error text-red-500 mb-2" role="alert">
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <form id="bottle-form" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group mt-4">
+        <label class="text-md font-bold" for="order_id">Número de órden</label>
+        <input type="text" id="order_id" name="order_id" class="input input-bordered input-primary w-full rounded" placeholder="Número de órden del cliente">
+      </div>
+
+      <div class="form-group mt-4">
+        <label class="text-md font-bold" for="store">Tienda</label>
+        <select id="store" name="store" class="select select-bordered select-primary w-full rounded">
+          {% for store in stores %}
+            <option value="{{ store.id }}">{{ store.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group mt-4">
+        <label class="text-md font-bold" for="description">Descripción</label>
+        <input type="text" id="description" name="description" class="input input-bordered input-primary w-full rounded" placeholder="Descripción">
+      </div>
+
+      <div class="form-group mt-4">
+        <label class="text-md font-bold" for="product_photo">Foto del Producto</label>
+        <input type="file" id="product_photo" name="product_photo" class="file-input file-input-bordered file-input-primary w-full rounded">
+        <img id="photo-preview" class="mt-4 hidden" style="width: 100%; height: auto; object-fit: cover;" />
+      </div>
+
+      <div class="form-group mt-4 flex items-end space-x-4 mb-4">
+        <div class="flex-grow">
+          <label class="text-md font-bold" for="bottle-select">Añadir Botellas</label>
+          <select id="bottle-select" class="select select-bordered select-primary w-full rounded">
+            {% for bottle in botellas %}
+              <option value="{{ bottle.id }}">{{ bottle.type }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="flex-grow">
+          <label class="text-md font-bold" for="bottle-quantity">Cantidad</label>
+          <input id="bottle-quantity" type="number" class="input input-bordered input-primary w-full rounded" placeholder="Cantidad">
+        </div>
+        <button type="button" id="add-bottle" class="btn btn-primary">+</button>
+      </div>
+
+      <div id="bottle-list" class="form-group mt-4 space-y-2"></div>
+      
+      <div id="error-message" class="alert alert-error text-red-500 mt-4 mb-4 hidden" role="alert">
+        <span>No se puede añadir la misma botella nuevamente. Elimine la botella existente primero.</span>
+      </div>
+
+      <div id="no-bottle-error" class="alert alert-error text-red-500 mt-4 mb-4 hidden" role="alert">
+        <span>Debe agregar al menos una botella antes de enviar.</span>
+      </div>
+
+      <button type="button" id="submit-button" class="btn btn-primary btn-block mt-6">Subir Picking de Botellas</button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    $(document).ready(function() {
+      $('#product_photo').change(function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            $('#photo-preview').attr('src', event.target.result).removeClass('hidden');
+          }
+          reader.readAsDataURL(file);
+        }
+      });
+
+      $('#add-bottle').click(function() {
+        let bottleId = $('#bottle-select').val();
+        let bottleName = $('#bottle-select option:selected').text();
+        let quantity = $('#bottle-quantity').val();
+        let existingBottle = $(`input[name="bottles"][value^="${bottleId}:"]`);
+        
+        if (existingBottle.length > 0) {
+          $('#error-message').removeClass('hidden');
+        } else {
+          $('#error-message').addClass('hidden');
+          if (bottleId && quantity) {
+            $('#bottle-list').append(`
+              <div class="bottle-item flex justify-between items-center bg-gray-100 rounded mb-3">
+                <input type="hidden" name="bottles" value="${bottleId}:${quantity}">
+                <span class="font-semibold">${bottleName}: ${quantity} Unidades</span>
+                <button type="button" class="remove-bottle btn btn-secondary">x</button>
+              </div>
+              <div class="divider"></div>
+            `);
+          }
+        }
+      });
+
+      $(document).on('click', '.remove-bottle', function() {
+        $(this).closest('.bottle-item').remove();
+        $('#error-message').addClass('hidden');
+      });
+
+      $('#submit-button').click(function() {
+        if ($('#bottle-list .bottle-item').length === 0) {
+          $('#no-bottle-error').removeClass('hidden');
+          return;
+        } else {
+          $('#no-bottle-error').addClass('hidden');
+        }
+
+        Swal.fire({
+          title: '¿Estás seguro?',
+          text: "¿Quieres subir el picking de botellas?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Sí, subir',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $('#bottle-form').submit();
+          }
+        });
+      });
+    });
+  </script>
+{% endblock %}

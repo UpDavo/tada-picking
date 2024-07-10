@@ -17,6 +17,7 @@ class Command(BaseCommand):
             ('Tiendas', 'dashboard:stores'),
             ('Ciudades', 'dashboard:cities'),
             ('Botellas', 'dashboard:bottles'),
+            ('Motor Picking', 'dashboard:picking'),
         ]
 
         for name, url_name in url_tuples:

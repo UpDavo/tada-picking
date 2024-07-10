@@ -15,6 +15,10 @@ urlpatterns = [
     # Invoice
     path('points', PointsList.as_view(), name='points'),
     path('points/upload', UploadPoints.as_view(), name='points_upload'),
+    
+    # Invoice
+    path('picking', PickingForm.as_view(), name='picking'),
+    path('picking/complete', PickingComplete.as_view(), name='picking_complete'),
 
 
     # Users

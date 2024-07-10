@@ -16,13 +16,13 @@
       {% endif %}
       <div class="grid md:grid-cols-2 grid-cols-1 gap-3 justify-items-center">
         {% for field in form %}
-          <div class="{% if field.name in 'status approval_comment product_photo' %}col-span-2{% endif %} w-full mt-1">
+          <div class="{% if field.name in 'status approval_comment product_photo description' %}col-span-2{% endif %} w-full mt-1">
             <label class="font-bold mb-3" for="{{ field.id_for_label }}">{{ field.label }}</label><br />
             {{ field }}
             {% if field.name == 'product_photo' and form.instance.product_photo %}
               <div class="mt-2">
                 <label class="font-bold mb-3">Foto Actual del Producto</label><br>
-                <img src="{{ form.instance.product_photo.url }}" alt="Product Photo" style="max-width: auto; height: auto; object-fit: cover;">
+                <img src="{{ form.instance.product_photo.url }}" alt="Product Photo" style="width: 100%; height: auto; object-fit: cover;">
               </div>
             {% endif %}
           </div>

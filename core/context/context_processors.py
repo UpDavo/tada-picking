@@ -32,11 +32,18 @@ def generate_drawer(request, user):
                     "active": is_active(request, ['dashboard'])
                 },
                 {
-                    "name": "Picking",
+                    "name": "Poc Picking",
                     "icon": "fas fa-boxes",
                     "href": reverse('dashboard:invoices'),
                     "href_native": ['dashboard:invoices'],
                     "active": is_active(request, ['invoices']),
+                },
+                {
+                    "name": "Moto Picking",
+                    "icon": "fas fa-motorcycle",
+                    "href": reverse('dashboard:picking'),
+                    "href_native": ['dashboard:picking'],
+                    "active": is_active(request, ['picking']),
                 }
             ]
         },
