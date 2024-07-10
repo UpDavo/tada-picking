@@ -1,1 +1,1 @@
-web: python manage.py collectstatic && gunicorn clubtada.wsgi
+web: gunicorn clubtada.wsgi

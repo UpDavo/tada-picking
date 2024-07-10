@@ -1,9 +1,8 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
-from clubtada.config.get_config import Config
-
-CONFIG = Config()
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,11 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = CONFIG.get('secrets', 'SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-if CONFIG.get('env', 'PROD') == 'True':
+if os.getenv('PROD') == 'True':
     DEBUG = False
 
 
@@ -75,36 +74,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'clubtada.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': CONFIG.get('database', 'DATABASE_NAME'),
-        'USER': CONFIG.get('database', 'DATABASE_USER'),
-        'PASSWORD': CONFIG.get('database', 'DATABASE_PASSWORD'),
-        'HOST': CONFIG.get('database', 'DATABASE_HOST'),
-        'PORT': '',
-    }
-}
-
-if CONFIG.get('env', 'PROD') == 'True':
+if os.getenv('PROD') == 'True':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': CONFIG.get('database_url', 'DATABASE_NAME'),
-            'USER': CONFIG.get('database_url', 'DATABASE_USER'),
-            'PASSWORD': CONFIG.get('database_url', 'DATABASE_PASSWORD'),
-            'HOST': CONFIG.get('database_url', 'DATABASE_HOST'),
-            'PORT': CONFIG.get('database_url', 'DATABASE_PORT'),
+            'NAME': os.getenv('DATABASE_NAME'),
+            'USER': os.getenv('DATABASE_USER'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+            'HOST': os.getenv('DATABASE_HOST'),
+            'PORT': os.getenv('DATABASE_PORT'),
         }
     }
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': CONFIG.get('database', 'DATABASE_NAME'),
-            'USER': CONFIG.get('database', 'DATABASE_USER'),
-            'PASSWORD': CONFIG.get('database', 'DATABASE_PASSWORD'),
-            'HOST': CONFIG.get('database', 'DATABASE_HOST'),
+            'NAME':  os.getenv('DATABASE_NAME_LOCAL '),
+            'USER':  os.getenv('DATABASE_USER_LOCAL'),
+            'PASSWORD':  os.getenv('DATABASE_PASSWORD_LOCAL'),
+            'HOST':  os.getenv('DATABASE_HOST_LOCAL'),
             'PORT': '',
         }
     }
