@@ -27,10 +27,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = CONFIG.get('secrets', 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['*']
 
 
 # Application definition
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -129,27 +131,20 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-
-STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_PATH = os.path.abspath(os.path.dirname(__name__))
-
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(MEDIA_PATH, 'media')
 
+
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(MEDIA_PATH, 'static'),
     os.path.join(MEDIA_PATH, 'media')
 ]
 STATIC_ROOT = os.path.join(MEDIA_PATH, 'local-cdn', 'static')
 
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -181,7 +176,6 @@ NOT_ALLOWED = 'dashboard:notAllowed'
 # EMAIL_USE_SSL = CONFIG.get('smtp', 'EMAIL_USE_SSL')
 
 # SIMPLE_HISTORY_HISTORY_CHANGE_REASON_USE_TEXT_FIELD = True
-
 
 
 BASE_URL = 'http://localhost:8000'
