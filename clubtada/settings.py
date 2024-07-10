@@ -74,6 +74,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'clubtada.wsgi.application'
 
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME':  os.getenv('DATABASE_NAME_LOCAL'),
+        'USER':  os.getenv('DATABASE_USER_LOCAL'),
+        'PASSWORD':  os.getenv('DATABASE_PASSWORD_LOCAL'),
+        'HOST':  os.getenv('DATABASE_HOST_LOCAL'),
+        'PORT': '',
+    }
+}
+
 if os.getenv('PROD') == 'True':
     DATABASES = {
         'default': {
@@ -83,17 +94,6 @@ if os.getenv('PROD') == 'True':
             'PASSWORD': os.getenv('DATABASE_PASSWORD'),
             'HOST': os.getenv('DATABASE_HOST'),
             'PORT': os.getenv('DATABASE_PORT'),
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME':  os.getenv('DATABASE_NAME_LOCAL '),
-            'USER':  os.getenv('DATABASE_USER_LOCAL'),
-            'PASSWORD':  os.getenv('DATABASE_PASSWORD_LOCAL'),
-            'HOST':  os.getenv('DATABASE_HOST_LOCAL'),
-            'PORT': '',
         }
     }
 
