@@ -12,9 +12,12 @@ SECRET_KEY = env.str('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
-X_FRAME_OPTIONS = 'ALLOWALL'
-CORS_ALLOW_ALL_ORIGINS = True
+
+if env.bool('PROD', default=False):
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1',
+                     'tada-picking-production.up.railway.app']
+
+CSRF_TRUSTED_ORIGINS = ['https://tada-picking-production.up.railway.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -61,6 +64,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'clubtada.wsgi.application'
+
+X_FRAME_OPTIONS = 'ALLOWALL'
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 DATABASES = {
     'default': {
