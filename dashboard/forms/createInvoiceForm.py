@@ -1,6 +1,5 @@
 from django import forms
 from core.models import Invoice, Bottle
-import json
 
 class CreateInvoiceForm(forms.ModelForm):
     class Meta:
@@ -15,8 +14,8 @@ class CreateInvoiceForm(forms.ModelForm):
         widgets = {
             'status': forms.Select(attrs={'class': 'select select-bordered select-primary w-full rounded'}),
             'approval_comment': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Comentario de aprobación'}),
-            'description': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Comentario de aprobación', 'disabled':'disabled'}),
-            'product_photo': forms.ClearableFileInput(attrs={'class': 'file-input file-input-bordered file-input-primary w-full rounded'}),
+            'description': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Comentario de aprobación', 'disabled': 'disabled'}),
+            'product_photo': forms.ClearableFileInput(attrs={'class': 'file-input file-input-bordered file-input-primary w-full rounded', 'disabled': 'disabled'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -44,7 +43,6 @@ class CreateInvoiceForm(forms.ModelForm):
                         'class': 'input input-bordered input-primary w-full rounded',
                     })
                 )
-
 
     def save(self, commit=True):
         invoice = super().save(commit=False)
