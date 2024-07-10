@@ -24,20 +24,25 @@ class CreateInvoiceForm(forms.ModelForm):
         # Obtener todas las botellas disponibles
         self.bottles = Bottle.objects.all()
         for bottle in self.bottles:
-            # Campos para las botellas actuales (Motorizado) - deshabilitados
-            self.fields[f'motorizado_bottle_{bottle.id}'] = forms.IntegerField(
-                label=f'Motorizado: {bottle.type}',
-                required=False,
-                initial=self.instance.bottles.get(str(bottle.id), 0),
-                widget=forms.NumberInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'disabled': 'disabled'})
-            )
-            # Campos para las botellas actualizadas (POC)
-            self.fields[f'poc_bottle_{bottle.id}'] = forms.IntegerField(
-                label=f'POC: {bottle.type}',
-                required=False,
-                initial=self.instance.updated_bottles.get(str(bottle.id), 0) if self.instance.updated_bottles else 0,
-                widget=forms.NumberInput(attrs={'class': 'input input-bordered input-primary w-full rounded'})
-            )
+            if self.instance.bottles.get(str(bottle.id), 0):
+                # Campos para las botellas actuales (Motorizado) - deshabilitados
+                self.fields[f'motorizado_bottle_{bottle.id}'] = forms.IntegerField(
+                    label=f'Motorizado: {bottle.type}',
+                    required=False,
+                    initial=self.instance.bottles.get(str(bottle.id), 0),
+                    widget=forms.NumberInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'disabled': 'disabled'})
+                )
+                
+                # Campos para las botellas actualizadas (POC)
+                self.fields[f'poc_bottle_{bottle.id}'] = forms.IntegerField(
+                    label=f'POC: {bottle.type}',
+                    required=False,
+                    initial=self.instance.updated_bottles.get(str(bottle.id), 0) if self.instance.updated_bottles else 0,
+                    widget=forms.NumberInput(attrs={
+                        'class': 'input input-bordered input-primary w-full rounded',
+                    })
+                )
+
 
     def save(self, commit=True):
         invoice = super().save(commit=False)

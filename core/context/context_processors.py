@@ -54,9 +54,9 @@ def generate_drawer(request, user):
                     "name": "Configuración de tiendas",
                     "icon": "fas fa-shopping-bag",
                     "href_native": ['dashboard:cities',
-                                    'dashboard:stores'],
+                                    'dashboard:stores', 'dashboard:bottles'],
                     "active": is_active(request, ['cities',
-                                                  'stores']),
+                                                  'stores', 'bottles']),
                     "children": [
                         {
                             "name": "Tiendas",
@@ -71,6 +71,13 @@ def generate_drawer(request, user):
                             "href_native": ['dashboard:cities'],
                             "icon": "fas fa-city",
                             "active": is_active(request, ['cities'])
+                        },
+                        {
+                            "name": "Botellas",
+                            "href": reverse('dashboard:bottles'),
+                            "href_native": ['dashboard:bottles'],
+                            "icon": "fas fa-wine-bottle",
+                            "active": is_active(request, ['bottles'])
                         }
                     ]
                 },

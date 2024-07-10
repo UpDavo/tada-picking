@@ -8,13 +8,13 @@ from core.views.error404 import Error404
 
 
 def default_view(request):
-    return redirect('store:index')
+    return redirect('dashboard:index')
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
-    path('store/', include('store.urls')),
+    # path('store/', include('store.urls')),
     path('accounts/', include('accounts.urls')),
     path('', default_view),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

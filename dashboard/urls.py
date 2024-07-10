@@ -40,6 +40,12 @@ urlpatterns = [
     path('cities/create', CreateCity.as_view(), name='city_create'),
     path('cities/<int:pk>/edit/', EditCity.as_view(), name='city_edit'),
     path('cities/<int:pk>/delete/', DeleteCity.as_view(), name='city_delete'),
+    
+    # Bottles
+    path('bottles', BottleList.as_view(), name='bottles'),
+    path('bottles/create', CreateBottle.as_view(), name='bottle_create'),
+    path('bottles/<int:pk>/edit/', EditBottle.as_view(), name='bottle_edit'),
+    path('bottles/<int:pk>/delete/', DeleteBottle.as_view(), name='bottle_delete'),
 
     # Products
     path('products', ProductList.as_view(), name='products'),
