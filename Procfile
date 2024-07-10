@@ -1,1 +1,1 @@
-web: gunicorn clubtada.wsgi
+web: python manage.py migrate && gunicorn clubtada.wsgi
