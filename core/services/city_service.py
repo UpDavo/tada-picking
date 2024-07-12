@@ -8,7 +8,7 @@ class CityService:
     @staticmethod
     def getList(request, name):
         # Obtener todos los usuarios
-        items = City.objects.order_by('created_at').all()
+        items = City.objects.order_by('-created_at').all()
 
         if name:
             items = items.filter(name__icontains=name)

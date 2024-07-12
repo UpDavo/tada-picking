@@ -1,6 +1,7 @@
 from django import forms
 from core.models import Bottle
 
+
 class CreateBottleForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -8,13 +9,18 @@ class CreateBottleForm(forms.ModelForm):
 
     class Meta:
         model = Bottle
-        fields = ['type']
+        fields = ['type', 'min_bottles']
         labels = {
             'type': 'Nombre de la Botella',
+            'min_bottles': 'Mínimo de botellas',
         }
         widgets = {
             'type': forms.TextInput(attrs={
-                'class': 'input input-bordered input-primary w-full rounded', 
+                'class': 'input input-bordered input-primary w-full rounded',
+                'placeholder': 'Nombre de la Botella'
+            }),
+            'min_bottles': forms.NumberInput(attrs={
+                'class': 'input input-bordered input-primary w-full rounded',
                 'placeholder': 'Nombre de la Botella'
             }),
         }

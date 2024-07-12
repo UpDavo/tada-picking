@@ -43,7 +43,7 @@
           <label class="text-md font-bold" for="bottle-select">Añadir Botellas</label>
           <select id="bottle-select" class="select select-bordered select-primary w-full rounded">
             {% for bottle in botellas %}
-              <option value="{{ bottle.id }}">{{ bottle.type }}</option>
+              <option value="{{ bottle.id }}">{{ bottle.type }} - Min: {{bottle.min_bottles}}</option>
             {% endfor %}
           </select>
         </div>

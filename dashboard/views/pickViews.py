@@ -28,7 +28,7 @@ class PickingForm(TemplateView):
         context['order_id'] = ''
         context['nombre'] = 'Crear Picking'
         context['picker_name'] = self.request.user.get_full_name()
-        context['picker_ci'] = self.request.user.ci 
+        context['picker_ci'] = self.request.user.ci
         context['botellas'] = Bottle.objects.all()
         context['stores'] = Store.objects.filter(name=self.request.user.store)
         return context
