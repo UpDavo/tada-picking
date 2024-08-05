@@ -9,3 +9,6 @@ from .storeViews import *
 from .cityViews import *
 from .bottleViews import *
 from .pickViews import *
+from .client_views import *
+from .orderViews import *
+from .bottleRules import *

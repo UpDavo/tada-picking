@@ -1,0 +1,137 @@
+{% extends 'layout/dashboard_layout.html' %}
+
+{% block content %}
+<div class="card bg-base-100 shadow-md flex justify-center items-center">
+    <form class="w-full card-body" action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong class="font-bold">¡Error!</strong>
+            <ul>
+                {% for error in form.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="grid md:grid-cols-2 grid-cols-1 gap-3">
+            {% for field in form %}
+            {% if field.name == 'general_quantity' %}
+            <!-- Mostrar solo si es regla general -->
+            <div class="w-full mt-1 hidden" id="general-quantity-field">
+                <label class="font-bold mb-3" for="{{ field.id_for_label }}">Cantidad General</label><br />
+                {{ field }}
+            </div>
+            {% elif 'quantity' in field.name %}
+            <!-- Mostrar cantidades para cada botella si no es regla general -->
+            <div class="col-span-2 mt-1 hidden bottle-quantity-field" id="quantity-{{ field.name }}">
+                <label class="font-bold mb-3" for="{{ field.id_for_label }}">Cantidad para {{ field.label }}</label><br />
+                {{ field }}
+            </div>
+            {% elif 'bottles' in field.name %}
+            <!-- Mostrar campos de checkbox para botellas -->
+            <div class="col-span-2 flex flex-wrap items-center space-x-4 bottle-checkbox-field">
+                <label class="font-bold mb-3">{{ field.label }}</label>
+                <div class="flex flex-wrap space-x-4">
+                    {% for subfield in field %}
+                    <label class="inline-flex items-center space-x-2">
+                        {{ subfield.tag }}
+                        <span>{{ subfield.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% elif field.name == 'is_general' %}
+            <!-- Checkbox para seleccionar si es regla general -->
+            <div class="w-full mt-1">
+                <label class="inline-flex items-center space-x-2">
+                    {{ field }}
+                    <span class="font-bold">Es una regla general</span>
+                </label>
+            </div>
+            {% else %}
+            <div class="w-full mt-1">
+                <label class="font-bold mb-3" for="{{ field.id_for_label }}">{{ field.label }}</label><br />
+                {{ field }}
+            </div>
+            {% endif %}
+            {% endfor %}
+
+            {% if formset %}
+            {% for subform in formset %}
+            {% for field in subform %}
+            <div class="w-full mt-1">
+                <label class="font-bold mb-3" for="{{ field.id_for_label }}">{{ field.label }}</label><br />
+                {{ field }}
+            </div>
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="flex gap-4">
+            <div class="w-full">
+                <button type="submit" class="btn btn-primary mt-4 btn-block"><i class="fas fa-save"></i>Guardar
+                    Item</button>
+            </div>
+            <div class="w-16">
+                <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-secondary mt-4"><i
+                        class="fas fa-arrow-left"></i></a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        function toggleQuantityFields() {
+            if ($('#id_is_general').is(':checked')) {
+                $('#general-quantity-field').show();
+                $('.bottle-quantity-field').hide();
+                $('.bottle-checkbox-field').hide();
+            } else {
+                $('#general-quantity-field').hide();
+                $('.bottle-checkbox-field').show();
+                // Show/hide individual quantity fields based on bottle selection
+                $('.bottle-quantity-field').each(function() {
+                    const bottleCheckbox = $(`input[name="bottles"][value="${$(this).attr('id').split('-').pop()}"]`);
+                    if (bottleCheckbox.is(':checked')) {
+                        $(this).removeClass('hidden');
+                    } else {
+                        $(this).addClass('hidden');
+                    }
+                });
+            }
+        }
+
+        // Ejecutar la función al cambiar el estado del checkbox
+        $('#id_is_general').on('change', toggleQuantityFields);
+
+        // Inicializar el estado de los campos al cargar la página
+        toggleQuantityFields();
+
+        // Obtener todos los checkboxes de botella
+        const bottleCheckboxes = $('input[type="checkbox"][name="bottles"]');
+
+        // Añadir event listener para mostrar/ocultar campos de cantidad
+        bottleCheckboxes.on('change', function () {
+            const quantityFieldId = `#quantity-bottle_${$(this).val()}_quantity`;
+            if ($(this).is(':checked')) {
+                $(quantityFieldId).removeClass('hidden');
+            } else {
+                $(quantityFieldId).addClass('hidden');
+            }
+        });
+
+        // Comprobación inicial para mostrar las cantidades seleccionadas
+        bottleCheckboxes.each(function () {
+            const quantityFieldId = `#quantity-bottle_${$(this).val()}_quantity`;
+            if ($(this).is(':checked')) {
+                $(quantityFieldId).removeClass('hidden');
+            } else {
+                $(quantityFieldId).addClass('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}

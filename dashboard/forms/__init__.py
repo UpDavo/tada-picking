@@ -7,3 +7,4 @@ from .createInvoiceForm import CreateInvoiceForm
 from .viewInvoiceForm import ViewInvoiceForm
 from .createBottleForm import CreateBottleForm
 from .createPickingForm import CreatePickingForm
+from .packRuleForm import PackRuleForm

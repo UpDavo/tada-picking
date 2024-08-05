@@ -4,7 +4,7 @@ from core.models import Invoice, Bottle
 class CreateInvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['status', 'approval_comment', 'product_photo', 'description']
+        fields = ['status', 'approval_comment', 'product_photo', 'description']  # No incluir order_id aquí para el rendering automático
         labels = {
             'status': 'Estado',
             'approval_comment': 'Comentario de Aprobación',
@@ -20,7 +20,14 @@ class CreateInvoiceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CreateInvoiceForm, self).__init__(*args, **kwargs)
         self.fields['status'].choices = Invoice.STATUS_CHOICES
-        self.fields['description'].required = False  # Hacer que el campo description no sea requerido
+        self.fields['description'].required = False
+
+        # Campo oculto para enviar el order_id
+        self.fields['order_id'] = forms.CharField(widget=forms.HiddenInput())
+
+        # Inicializar el campo order_id con el valor de la instancia
+        if self.instance.pk:
+            self.fields['order_id'].initial = self.instance.order_id
 
         # Obtener todas las botellas disponibles
         self.bottles = Bottle.objects.all()
@@ -31,14 +38,16 @@ class CreateInvoiceForm(forms.ModelForm):
                     label=f'Motorizado: {bottle.type}',
                     required=False,
                     initial=self.instance.bottles.get(str(bottle.id), 0),
-                    widget=forms.NumberInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'disabled': 'disabled'})
+                    widget=forms.NumberInput(attrs={
+                        'class': 'input input-bordered input-primary w-full rounded', 'disabled': 'disabled'})
                 )
 
                 # Campos para las botellas actualizadas (POC)
                 self.fields[f'poc_bottle_{bottle.id}'] = forms.IntegerField(
                     label=f'POC: {bottle.type}',
                     required=False,
-                    initial=self.instance.updated_bottles.get(str(bottle.id), 0) if self.instance.updated_bottles else 0,
+                    initial=self.instance.updated_bottles.get(
+                        str(bottle.id), 0) if self.instance.updated_bottles else 0,
                     widget=forms.NumberInput(attrs={
                         'class': 'input input-bordered input-primary w-full rounded',
                     })

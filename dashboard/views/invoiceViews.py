@@ -11,8 +11,9 @@ import pandas as pd
 import io
 from django.utils.decorators import method_decorator
 
-PERMISSION = 'dashboard:invoices'
+from core.services.client_service import ClientService
 
+PERMISSION = 'dashboard:invoices'
 
 
 class InvoiceList(TemplateView):
@@ -51,12 +52,14 @@ class InvoiceList(TemplateView):
 
         return context
 
+
 @method_decorator(login_required, name='dispatch')
 class DownloadExcel(View):
 
     def get(self, request, *args, **kwargs):
-        df = InvoiceService.get_excel_data(self.request, order_id=request.GET.get('names'))
-        
+        df = InvoiceService.get_excel_data(
+            self.request, order_id=request.GET.get('names'))
+
         # Crear un archivo Excel en memoria
         excel_buffer = io.BytesIO()
         with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
@@ -64,12 +67,12 @@ class DownloadExcel(View):
 
         # Obtener el contenido del archivo Excel
         excel_buffer.seek(0)
-        response = HttpResponse(excel_buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response = HttpResponse(
+            excel_buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=invoices.xlsx'
         return response
 
-    
-    
+
 class UpdateInvoice(UpdateView):
     template_name = 'components/generic/generic_edit_invoice.html'
     form_class = CreateInvoiceForm
@@ -96,6 +99,15 @@ class UpdateInvoice(UpdateView):
     def form_valid(self, form):
         invoice = form.save(commit=False)
         updated_bottles_data = form.cleaned_data.get('updated_bottles', None)
+        order_id = form.cleaned_data.get('order_id', None)
+        status = form.cleaned_data.get('status', None)
+        
+        # ClientService.assignAndValidate(order_id)
+
+        
+        if status == 'approved' or status == 'approved_but_incomplete':
+            ClientService.assignAndValidate(order_id)
+
         if updated_bottles_data:
             try:
                 updated_bottles = json.loads(updated_bottles_data)
@@ -105,8 +117,8 @@ class UpdateInvoice(UpdateView):
                 return self.form_invalid(form)
         invoice.save()
         return super().form_valid(form)
-    
-    
+
+
 class ViewInvoice(UpdateView):
     template_name = 'components/generic/generic_edit_invoice.html'
     form_class = ViewInvoiceForm

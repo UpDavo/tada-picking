@@ -9,3 +9,6 @@ from .invoice import Invoice
 from .city import City
 from .bottle import Bottle
 from .store import Store
+from .client import Client
+from .client_orders import ClientOrders
+from .bottle_rules import PackRule, BottleQuantity

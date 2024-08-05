@@ -4,7 +4,7 @@ from core.models import Bottle
 
 
 class BottleService:
-    
+
     @staticmethod
     def getList(request, name):
         # Obtener todos los usuarios
@@ -15,7 +15,8 @@ class BottleService:
 
         # Obtener los campos del modelo Usuario como una lista de objetos Field
         fields = Bottle._meta.fields
-        fields_to_include = ['id', 'created_at','type', 'min_bottles']
+        fields_to_include = ['id', 'created_at',
+                             'image', 'type', 'min_bottles']
         fields = [field for field in fields if field.name in fields_to_include]
 
         # Paginar los usuarios

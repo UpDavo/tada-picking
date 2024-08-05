@@ -1,138 +1,317 @@
-{% extends 'layout/dashboard_layout.html' %}
+{% extends 'layout/dashboard_layout.html' %} {% block content %}
+<div class="container">
+  {% if messages %}
+  <div class="mb-4">
+    {% for message in messages %}
+    <div class="alert alert-error text-red-500 mb-2" role="alert">
+      <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <form id="bottle-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group mt-4">
+      <label class="text-md font-bold" for="user_ci"
+        >Número de cédula del cliente</label
+      >
+      <input
+        type="text"
+        id="user_ci"
+        name="user_ci"
+        class="input input-bordered input-primary w-full rounded"
+        placeholder="Número de cédula del cliente"
+        required
+      />
+      <div class="error-message text-red-500 text-sm hidden">
+        Por favor, ingrese el número de cédula del cliente.
+      </div>
+    </div>
+    <div class="form-group mt-4">
+      <label class="text-md font-bold" for="order_id">Número de órden</label>
+      <input
+        type="text"
+        id="order_id"
+        name="order_id"
+        class="input input-bordered input-primary w-full rounded"
+        placeholder="Número de órden del cliente"
+        required
+      />
+      <div class="error-message text-red-500 text-sm hidden">
+        Por favor, ingrese el número de órden.
+      </div>
+    </div>
 
-{% block content %}
-  <div class="container">
-    {% if messages %}
-      <div class="mb-4">
-        {% for message in messages %}
-          <div class="alert alert-error text-red-500 mb-2" role="alert">
-            <span>{{ message }}</span>
-          </div>
+    <div class="form-group mt-4">
+      <label class="text-md font-bold" for="store">Tienda</label>
+      <select
+        id="store"
+        name="store"
+        class="select select-bordered select-primary w-full rounded"
+        required
+      >
+        <option value="">Seleccione una tienda</option>
+        {% for store in stores %}
+        <option value="{{ store.id }}">{{ store.name }}</option>
         {% endfor %}
+      </select>
+      <div class="error-message text-red-500 text-sm hidden">
+        Por favor, seleccione una tienda.
       </div>
-    {% endif %}
-    <form id="bottle-form" method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="form-group mt-4">
-        <label class="text-md font-bold" for="order_id">Número de órden</label>
-        <input type="text" id="order_id" name="order_id" class="input input-bordered input-primary w-full rounded" placeholder="Número de órden del cliente">
-      </div>
+    </div>
 
-      <div class="form-group mt-4">
-        <label class="text-md font-bold" for="store">Tienda</label>
-        <select id="store" name="store" class="select select-bordered select-primary w-full rounded">
-          {% for store in stores %}
-            <option value="{{ store.id }}">{{ store.name }}</option>
+    <div class="form-group mt-4">
+      <label class="text-md font-bold" for="description">Descripción</label>
+      <input
+        type="text"
+        id="description"
+        name="description"
+        class="input input-bordered input-primary w-full rounded"
+        placeholder="Descripción"
+        required
+      />
+      <div class="error-message text-red-500 text-sm hidden">
+        Por favor, ingrese una descripción.
+      </div>
+    </div>
+
+    <div class="form-group mt-4">
+      <label class="text-md font-bold" for="product_photo"
+        >Foto del Producto</label
+      >
+      <input
+        type="file"
+        id="product_photo"
+        name="product_photo"
+        class="file-input file-input-bordered file-input-primary w-full rounded"
+        accept="image/*"
+        capture="camera"
+        required
+      />
+      <img
+        id="photo-preview"
+        class="mt-4 hidden"
+        style="width: 100%; height: auto; object-fit: cover"
+      />
+      <div class="error-message text-red-500 text-sm hidden">
+        Por favor, suba una foto del producto.
+      </div>
+    </div>
+
+    <div class="form-group mt-4 flex items-end space-x-4 mb-4">
+      <div class="flex-grow">
+        <label class="text-md font-bold" for="bottle-select"
+          >Añadir Botellas</label
+        >
+        <select
+          id="bottle-select"
+          class="select select-bordered select-primary w-full rounded"
+          required
+        >
+          <option value="">Seleccione una botella</option>
+          {% for bottle in botellas %}
+          <option
+            value="{{ bottle.id }}"
+            data-image="{{ bottle.image }}"
+            data-min="{{ bottle.min_bottles }}"
+          >
+            {{ bottle.type }}
+          </option>
           {% endfor %}
         </select>
-      </div>
-
-      <div class="form-group mt-4">
-        <label class="text-md font-bold" for="description">Descripción</label>
-        <input type="text" id="description" name="description" class="input input-bordered input-primary w-full rounded" placeholder="Descripción">
-      </div>
-
-      <div class="form-group mt-4">
-        <label class="text-md font-bold" for="product_photo">Foto del Producto</label>
-        <input type="file" id="product_photo" name="product_photo" class="file-input file-input-bordered file-input-primary w-full rounded" accept="image/*" capture="camera">
-        <img id="photo-preview" class="mt-4 hidden" style="width: 100%; height: auto; object-fit: cover;" />
-      </div>
-
-      <div class="form-group mt-4 flex items-end space-x-4 mb-4">
-        <div class="flex-grow">
-          <label class="text-md font-bold" for="bottle-select">Añadir Botellas</label>
-          <select id="bottle-select" class="select select-bordered select-primary w-full rounded">
-            {% for bottle in botellas %}
-              <option value="{{ bottle.id }}">{{ bottle.type }} - Min: {{bottle.min_bottles}}</option>
-            {% endfor %}
-          </select>
+        <div class="error-message text-red-500 text-sm hidden">
+          Por favor, seleccione una botella.
         </div>
-        <div class="flex-grow">
-          <label class="text-md font-bold" for="bottle-quantity">Cantidad</label>
-          <input id="bottle-quantity" type="number" class="input input-bordered input-primary w-full rounded" placeholder="Cantidad">
+      </div>
+      <div class="flex-grow">
+        <label class="text-md font-bold" for="bottle-quantity">Cantidad</label>
+        <input
+          id="bottle-quantity"
+          type="number"
+          class="input input-bordered input-primary w-full rounded"
+          placeholder="Cantidad"
+          min="1"
+          required
+        />
+        <div class="error-message text-red-500 text-sm hidden">
+          Por favor, ingrese la cantidad de botellas.
         </div>
-        <button type="button" id="add-bottle" class="btn btn-primary">+</button>
       </div>
+      <button type="button" id="add-bottle" class="btn btn-primary">+</button>
+    </div>
 
-      <div id="bottle-list" class="form-group mt-4 space-y-2"></div>
-      
-      <div id="error-message" class="alert alert-error text-red-500 mt-4 mb-4 hidden" role="alert">
-        <span>No se puede añadir la misma botella nuevamente. Elimine la botella existente primero.</span>
-      </div>
+    <!-- Contenedor para mostrar la imagen de la botella seleccionada -->
+    <div id="bottle-image-container" class="mt-4">
+      <img
+        id="bottle-image"
+        src=""
+        alt="Imagen de la botella"
+        class="hidden w-full max-w-xs rounded shadow"
+      />
+    </div>
 
-      <div id="no-bottle-error" class="alert alert-error text-red-500 mt-4 mb-4 hidden" role="alert">
-        <span>Debe agregar al menos una botella antes de enviar.</span>
-      </div>
+    <div id="bottle-list" class="form-group mt-4 space-y-2"></div>
 
-      <button type="button" id="submit-button" class="btn btn-primary btn-block mt-6">Subir Picking de Botellas</button>
-    </form>
-  </div>
+    <div
+      id="error-message"
+      class="alert alert-error text-red-500 mt-4 mb-4 hidden"
+      role="alert"
+    >
+      <span></span>
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    $(document).ready(function() {
-      $('#product_photo').change(function() {
-        const file = this.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            $('#photo-preview').attr('src', event.target.result).removeClass('hidden');
-          }
-          reader.readAsDataURL(file);
+    <div
+      id="no-bottle-error"
+      class="alert alert-error text-red-500 mt-4 mb-4 hidden"
+      role="alert"
+    >
+      <span>Debe agregar al menos una botella antes de enviar.</span>
+    </div>
+
+    <button
+      type="button"
+      id="submit-button"
+      class="btn btn-primary btn-block mt-6"
+    >
+      Subir Picking de Botellas
+    </button>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  $(document).ready(function () {
+    const maxBottles = {{ max_bottles }};
+    let totalBottles = 0;
+
+    $("#product_photo").change(function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          $("#photo-preview")
+            .attr("src", event.target.result)
+            .removeClass("hidden");
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    $("#bottle-select").change(function() {
+      const selectedOption = this.options[this.selectedIndex];
+      const imageUrl = $(selectedOption).data('image');
+      const minQuantity = $(selectedOption).data('min');
+      $("#bottle-quantity").attr("min", minQuantity).attr("step", minQuantity).val(minQuantity);
+      if (imageUrl) {
+        $("#bottle-image").attr("src", imageUrl).removeClass("hidden");
+        $("#bottle-image-container").removeClass("hidden");
+      } else {
+        $("#bottle-image").addClass("hidden");
+        $("#bottle-image-container").addClass("hidden");
+      }
+    });
+
+    // Inicializar la imagen con la primera opción si existe
+    if ($("#bottle-select option").length > 0) {
+      const firstOption = $("#bottle-select option:first");
+      const initialImageUrl = firstOption.data('image');
+      const initialMinQuantity = firstOption.data('min');
+      $("#bottle-quantity").attr("min", initialMinQuantity).attr("step", initialMinQuantity).val(initialMinQuantity);
+      if (initialImageUrl) {
+        $("#bottle-image").attr("src", initialImageUrl).removeClass("hidden");
+        $("#bottle-image-container").removeClass("hidden");
+      }
+    }
+
+    $("#add-bottle").click(function () {
+      let bottleId = $("#bottle-select").val();
+      let bottleName = $("#bottle-select option:selected").text();
+      let quantity = parseInt($("#bottle-quantity").val(), 10);
+      let minQuantity = parseInt($("#bottle-select option:selected").data('min'), 10);
+      let imageUrl = $("#bottle-select option:selected").data('image');
+
+      if (!quantity || quantity < minQuantity || quantity % minQuantity !== 0) {
+        $("#error-message span").text(`La cantidad para ${bottleName} debe ser un múltiplo de ${minQuantity}.`);
+        $("#error-message").removeClass("hidden");
+        return;
+      }
+
+      if (totalBottles + quantity > maxBottles) {
+        $("#error-message span").text(`El total de botellas no puede exceder de ${maxBottles}.`);
+        $("#error-message").removeClass("hidden");
+        return;
+      }
+
+      let existingBottle = $(`input[name="bottles"][value^="${bottleId}:"]`);
+
+      if (existingBottle.length > 0) {
+        $("#error-message span").text('No se puede añadir la misma botella nuevamente. Elimine la botella existente primero.');
+        $("#error-message").removeClass("hidden");
+      } else {
+        $("#error-message").addClass("hidden");
+        if (bottleId && quantity) {
+          totalBottles += quantity;
+          $("#bottle-list").append(`
+            <div class="bottle-item flex justify-between items-center bg-gray-100 rounded mb-3">
+              <input type="hidden" name="bottles" value="${bottleId}:${quantity}">
+              <img src="${imageUrl}" alt="${bottleName}" class="w-10 h-10 rounded-full mr-2">
+              <span class="font-semibold">${bottleName}: ${quantity} Unidades</span>
+              <button type="button" class="remove-bottle btn btn-secondary">x</button>
+            </div>
+            <div class="divider"></div>
+          `);
         }
-      });
+      }
+    });
 
-      $('#add-bottle').click(function() {
-        let bottleId = $('#bottle-select').val();
-        let bottleName = $('#bottle-select option:selected').text();
-        let quantity = $('#bottle-quantity').val();
-        let existingBottle = $(`input[name="bottles"][value^="${bottleId}:"]`);
-        
-        if (existingBottle.length > 0) {
-          $('#error-message').removeClass('hidden');
+    $(document).on("click", ".remove-bottle", function () {
+      const quantityToRemove = parseInt($(this).siblings('input[name="bottles"]').val().split(':')[1], 10);
+      totalBottles -= quantityToRemove;
+      $(this).closest(".bottle-item").remove();
+      $("#error-message").addClass("hidden");
+    });
+
+    $("#submit-button").click(function () {
+      let formIsValid = true;
+
+      // Verificar que se haya agregado al menos una botella
+      if ($("#bottle-list .bottle-item").length === 0) {
+        $("#no-bottle-error").removeClass("hidden");
+        formIsValid = false;
+      } else {
+        $("#no-bottle-error").addClass("hidden");
+      }
+
+      // Verificar que todos los campos requeridos estén completos
+      $("#bottle-form input[required], #bottle-form select[required]").each(function() {
+        const errorMessage = $(this).siblings('.error-message');
+        if (!$(this).val()) {
+          formIsValid = false;
+          $(this).addClass("border-red-500");
+          errorMessage.removeClass('hidden');
         } else {
-          $('#error-message').addClass('hidden');
-          if (bottleId && quantity) {
-            $('#bottle-list').append(`
-              <div class="bottle-item flex justify-between items-center bg-gray-100 rounded mb-3">
-                <input type="hidden" name="bottles" value="${bottleId}:${quantity}">
-                <span class="font-semibold">${bottleName}: ${quantity} Unidades</span>
-                <button type="button" class="remove-bottle btn btn-secondary">x</button>
-              </div>
-              <div class="divider"></div>
-            `);
-          }
+          $(this).removeClass("border-red-500");
+          errorMessage.addClass('hidden');
         }
       });
 
-      $(document).on('click', '.remove-bottle', function() {
-        $(this).closest('.bottle-item').remove();
-        $('#error-message').addClass('hidden');
-      });
-
-      $('#submit-button').click(function() {
-        if ($('#bottle-list .bottle-item').length === 0) {
-          $('#no-bottle-error').removeClass('hidden');
-          return;
-        } else {
-          $('#no-bottle-error').addClass('hidden');
-        }
-
+      if (formIsValid) {
         Swal.fire({
-          title: '¿Estás seguro?',
+          title: "¿Estás seguro?",
           text: "¿Quieres subir el picking de botellas?",
-          icon: 'warning',
+          icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: '#5f3ea8',
-          cancelButtonColor: '#e39424',
-          confirmButtonText: 'Sí, subir',
-          cancelButtonText: 'Cancelar'
+          confirmButtonColor: "#5f3ea8",
+          cancelButtonColor: "#e39424",
+          confirmButtonText: "Sí, subir",
+          cancelButtonText: "Cancelar",
         }).then((result) => {
           if (result.isConfirmed) {
-            $('#bottle-form').submit();
+            $("#bottle-form").submit();
           }
         });
-      });
+      }
     });
-  </script>
+  });
+</script>
 {% endblock %}

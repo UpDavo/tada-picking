@@ -58,12 +58,36 @@ def generate_drawer(request, user):
                 #     "active": is_active(request, ['points']),
                 # },
                 {
+                    "name": "Configuración de clientes",
+                    "icon": "fas fa-users-cog",
+                    "href_native": ['dashboard:orders',
+                                    'dashboard:clients'],
+                    "active": is_active(request, ['orders',
+                                                  'clients']),
+                    "children": [
+                        {
+                            "name": "Clientes",
+                            "icon": "fas fa-user",
+                            "href": reverse('dashboard:clients'),
+                            "href_native": ['dashboard:clients'],
+                            "active": is_active(request, ['clients']),
+                        },
+                        {
+                            "name": "Pedidos por Cliente",
+                            "href": reverse('dashboard:orders'),
+                            "href_native": ['dashboard:orders'],
+                            "icon": "fas fa-shopping-cart",
+                            "active": is_active(request, ['orders'])
+                        }
+                    ]
+                },
+                {
                     "name": "Configuración de tiendas",
                     "icon": "fas fa-shopping-bag",
                     "href_native": ['dashboard:cities',
-                                    'dashboard:stores', 'dashboard:bottles'],
+                                    'dashboard:stores', 'dashboard:bottles', 'dashboard:bottle_rules'],
                     "active": is_active(request, ['cities',
-                                                  'stores', 'bottles']),
+                                                  'stores', 'bottles', 'bottle_rules']),
                     "children": [
                         {
                             "name": "Tiendas",
@@ -85,11 +109,18 @@ def generate_drawer(request, user):
                             "href_native": ['dashboard:bottles'],
                             "icon": "fas fa-wine-bottle",
                             "active": is_active(request, ['bottles'])
+                        },
+                        {
+                            "name": "Reglas de Botellas",
+                            "href": reverse('dashboard:bottle_rules'),
+                            "href_native": ['dashboard:bottle_rules'],
+                            "icon": "fas fa-balance-scale",
+                            "active": is_active(request, ['bottle_rules'])
                         }
                     ]
                 },
                 {
-                    "name": "Items a Usuarios",
+                    "name": "Items a Clientes",
                     "icon": "fas fa-box-open",
                     "href_native": ['dashboard:products',
                                     'dashboard:stocks'],
