@@ -31,6 +31,8 @@ urlpatterns = [
 
     # Clients
     path('clients', ClientList.as_view(), name='clients'),
+    path('clients/upload', UploadClients.as_view(),
+         name='clients_upload_general'),
 
     # Orders
     path('orders', ClientOrdersList.as_view(), name='orders'),
@@ -85,6 +87,10 @@ urlpatterns = [
     path('stocks/<int:pk>/upload', UploadStock.as_view(), name='stock_upload'),
     path('stocks/upload', UploadStockGeneral.as_view(),
          name='stock_upload_general'),
+
+
+    # api
+    path('verificar-celular', verificar_celular, name='verificar_celular'),
 
 
     # Extras

@@ -30,11 +30,16 @@
               <td class="uppercase"><div class="badge badge-secondary">Inactivo</div></td>
               {% endif %}
 
-            {% elif nombre == 'Botellas' and forloop.counter0 == 3 %}
-                <td class="uppercase">
-                  <img class="w-14 h-12 object-cover" src="{% static value %}" alt="Product Image">
-                </td>
-            {% else %}
+              {% elif nombre == 'Botellas' and forloop.counter0 == 3 %}
+                  <td class="uppercase">
+                      {% if value %}
+                          <img class="object-cover" style="width: 5rem;height: 8rem;" src="{{ value.url }}" alt="Product Image">
+                      {% else %}
+                          <span>No image available</span>
+                      {% endif %}
+                  </td>
+              {% else %}
+          
               <td class="uppercase">{{ value }}</td>
             {% endif %}
           {% endfor %}

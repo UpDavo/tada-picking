@@ -2,6 +2,8 @@ from django.core.paginator import Paginator
 from core.models import Client, ClientOrders, Invoice, PackRule, Stock
 from django.utils import timezone
 from django.db import IntegrityError, transaction
+from openpyxl import Workbook
+from django.http import HttpResponse
 # from django.urls import reverse_lazy
 
 
@@ -17,7 +19,8 @@ class ClientService:
 
         # Obtener los campos del modelo Usuario como una lista de objetos Field
         fields = Client._meta.fields
-        fields_to_include = ['id', 'created_at', 'name', 'ci', 'email']
+        fields_to_include = ['id', 'created_at',
+                             'name', 'phone_number', 'email']
         fields = [field for field in fields if field.name in fields_to_include]
 
         # Paginar los usuarios
@@ -26,6 +29,7 @@ class ClientService:
         page_obj = paginator.get_page(page_number)
 
         list_url = 'dashboard:clients'
+        upload_url = 'dashboard:clients_upload_general'
 
         # Obtener los valores de los campos para cada usuario
         object_data = []
@@ -33,7 +37,7 @@ class ClientService:
             obj_data = [getattr(obj, field.name) for field in fields]
             object_data.append(obj_data)
 
-        return page_obj, fields, object_data, list_url
+        return page_obj, fields, object_data, list_url, upload_url
 
     @staticmethod
     def getOrderList(request, name):
@@ -65,7 +69,7 @@ class ClientService:
         return page_obj, fields, object_data, list_url
 
     @staticmethod
-    def checkUses(quantity, user_ci):
+    def checkUses(quantity, user_phone):
         # Obtener la fecha actual
         now = timezone.now()
 
@@ -74,7 +78,7 @@ class ClientService:
 
         # Filtrar las órdenes del cliente creadas desde el primer día del mes actual
         orders = ClientOrders.objects.filter(
-            client__ci=user_ci,
+            client__phone_number=user_phone,
             created_at__gte=first_day_of_month
         )
 
@@ -85,9 +89,9 @@ class ClientService:
             return True
 
     @staticmethod
-    def checkClientExists(user_ci):
+    def checkClientExists(user_phone):
         try:
-            client = Client.objects.get(ci=user_ci)
+            client = Client.objects.get(phone_number=user_phone)
             return client
         except Client.DoesNotExist:
             return False
@@ -104,10 +108,10 @@ class ClientService:
             return f"Error: {str(e)}"
 
     @staticmethod
-    def createOrder(client_ci, order_number, assigned_code=None, is_email_sended=False):
+    def createOrder(user_phone, order_number, assigned_code=None, is_email_sended=False):
         try:
             # Obtener el cliente por CI
-            client = Client.objects.get(ci=client_ci)
+            client = Client.objects.get(phone_number=user_phone)
 
             # Crear una nueva instancia de ClientOrders
             with transaction.atomic():
@@ -216,3 +220,73 @@ class ClientService:
         except ClientOrders.DoesNotExist:
             # La orden con ID no existe
             return
+
+    @staticmethod
+    def create_excel_template2():
+        # Crear un libro de trabajo
+        wb = Workbook()
+        ws = wb.active
+
+        # Definir los títulos de las columnas
+        columns = ['ci', 'nombre', 'email', 'celular']
+        ws.append(columns)
+
+        # Guardar el libro en un objeto de respuesta HTTP
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="Plantilla_codigos_skus.xlsx"'
+        wb.save(response)
+
+        return response
+
+    @staticmethod
+    def uploadDataframe(df):
+        # Renombrar columnas para que coincidan con los campos del modelo Client
+        df.rename(columns={
+            'nombre': 'name',
+            'celular': 'phone_number',
+            'ci': 'ci',
+            'email': 'email'
+        }, inplace=True)
+
+        # Convertir todas las columnas del DataFrame a tipo string
+        df = df.astype(str)
+
+        # Obtener todos los CIs de los clientes existentes y convertirlos a strings
+        existing_cis = set(str(ci)
+                           for ci in Client.objects.values_list('ci', flat=True))
+
+        # Filtrar el DataFrame para eliminar filas con CIs existentes
+        df_filtered = df[~df['ci'].isin(existing_cis)]
+
+        # Función para transformar el número de teléfono
+        def transform_phone_number(phone_number):
+            # Si el número de teléfono comienza con +593, reemplazarlo por 0
+            if phone_number.startswith('+593'):
+                phone_number = '0' + phone_number[4:]
+            # Si comienza con el código de país sin el '+', también reemplazarlo
+            elif phone_number.startswith('593'):
+                phone_number = '0' + phone_number[3:]
+            # Asegurarse de que el número de teléfono tenga exactamente 10 dígitos
+            if len(phone_number) == 10 and phone_number.startswith('09'):
+                return phone_number
+            # Si no cumple con el formato, retornamos None para indicar que es inválido
+            return None
+
+        # Aplicar la transformación a la columna de números de teléfono
+        df_filtered['phone_number'] = df_filtered['phone_number'].apply(
+            transform_phone_number)
+
+        # Crear una lista de instancias de clientes que necesitan ser creadas
+        clients_to_create = [
+            Client(
+                ci=row['ci'],
+                name=row['name'],
+                phone_number=row['phone_number'],
+                email=row['email']
+            )
+            for _, row in df_filtered.iterrows() if row['phone_number'] is not None
+        ]
+
+        # Insertar todos los nuevos clientes en la base de datos en un solo paso
+        if clients_to_create:
+            Client.objects.bulk_create(clients_to_create)

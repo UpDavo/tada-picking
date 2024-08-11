@@ -11,48 +11,33 @@
   {% endif %}
   <form id="bottle-form" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="form-group mt-4">
-      <label class="text-md font-bold" for="user_ci"
-        >Número de cédula del cliente</label
-      >
-      <input
-        type="text"
-        id="user_ci"
-        name="user_ci"
-        class="input input-bordered input-primary w-full rounded"
-        placeholder="Número de cédula del cliente"
-        required
-      />
-      <div class="error-message text-red-500 text-sm hidden">
-        Por favor, ingrese el número de cédula del cliente.
-      </div>
-    </div>
-    <div class="form-group mt-4">
-      <label class="text-md font-bold" for="order_id">Número de órden</label>
-      <input
-        type="text"
-        id="order_id"
-        name="order_id"
-        class="input input-bordered input-primary w-full rounded"
-        placeholder="Número de órden del cliente"
-        required
-      />
-      <div class="error-message text-red-500 text-sm hidden">
-        Por favor, ingrese el número de órden.
-      </div>
-    </div>
 
+    <!-- Campo para el número de celular, que será deshabilitado -->
+    <div class="form-group mt-4 hidden" id="phone-number-group">
+      <label class="text-md font-bold" for="user_phone">Número de Celular</label>
+      <input
+        type="text"
+        id="user_phone"
+        name="user_phone"
+        class="input input-bordered input-primary w-full rounded"
+        readonly
+      />
+    </div>
+    
     <div class="form-group mt-4">
       <label class="text-md font-bold" for="store">Tienda</label>
       <select
         id="store"
         name="store"
         class="select select-bordered select-primary w-full rounded"
+        {% if stores|length == 1 %}readonly{% endif %}
         required
       >
+        {% if stores|length > 1 %}
         <option value="">Seleccione una tienda</option>
+        {% endif %}
         {% for store in stores %}
-        <option value="{{ store.id }}">{{ store.name }}</option>
+        <option value="{{ store.id }}" {% if stores|length == 1 %}selected{% endif %}>{{ store.name }}</option>
         {% endfor %}
       </select>
       <div class="error-message text-red-500 text-sm hidden">
@@ -91,7 +76,7 @@
       <img
         id="photo-preview"
         class="mt-4 hidden"
-        style="width: 100%; height: auto; object-fit: cover"
+        style="width: 100%; height: 15rem; object-fit: contain"
       />
       <div class="error-message text-red-500 text-sm hidden">
         Por favor, suba una foto del producto.
@@ -112,7 +97,7 @@
           {% for bottle in botellas %}
           <option
             value="{{ bottle.id }}"
-            data-image="{{ bottle.image }}"
+            data-image="{% if bottle.image %}{{ bottle.image.url }}{% else %}URL_DE_IMAGEN_POR_DEFECTO{% endif %}"
             data-min="{{ bottle.min_bottles }}"
           >
             {{ bottle.type }}
@@ -147,6 +132,7 @@
         src=""
         alt="Imagen de la botella"
         class="hidden w-full max-w-xs rounded shadow"
+        style="height: 14rem; object-fit: contain"
       />
     </div>
 
@@ -183,6 +169,77 @@
   $(document).ready(function () {
     const maxBottles = {{ max_bottles }};
     let totalBottles = 0;
+
+    const submitButton = $("#submit-button");
+
+    // Deshabilitar el botón de envío inicialmente
+    submitButton.prop("disabled", true);
+
+    // Mostrar el swal al cargar la página
+    Swal.fire({
+      title: 'Ingrese el número de celular del cliente',
+      input: 'text',
+      inputPlaceholder: 'Número celular',
+      showCancelButton: false,
+      allowOutsideClick: false,
+      confirmButtonColor: "#5f3ea8",
+      confirmButtonText: 'Verificar',
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Por favor, ingrese su número celular';
+        }
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Llamada a la API para verificar el número celular
+        const numeroCelular = result.value;
+        $.ajax({
+          url: "{% url 'dashboard:verificar_celular'%}", 
+          method: 'POST',
+          data: JSON.stringify({ numero: numeroCelular }),
+          success: function(response) {
+            if (response.verificado) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Número verificado',
+                text: 'Puede continuar con el formulario',
+                showCancelButton: false,
+                allowOutsideClick: false,
+                confirmButtonColor: "#5f3ea8",
+              }).then(() => {
+                $("#user_phone").val(numeroCelular).closest('.form-group').removeClass('hidden');
+                // Habilitar el botón de envío
+                submitButton.prop("disabled", false);
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Número no verificado',
+                text: 'No puede continuar con el formulario',
+                showConfirmButton: true,
+                showCancelButton: false,
+                allowOutsideClick: false,
+                confirmButtonColor: "#5f3ea8",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.reload();
+                }
+              });
+            }
+          },
+          error: function() {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error en la verificación',
+              text: 'Por favor, intente de nuevo más tarde',
+              showConfirmButton: false,
+            }).then(() => {
+              window.location.reload();
+            });
+          }
+        });
+      }
+    });
 
     $("#product_photo").change(function () {
       const file = this.files[0];
@@ -254,7 +311,7 @@
           $("#bottle-list").append(`
             <div class="bottle-item flex justify-between items-center bg-gray-100 rounded mb-3">
               <input type="hidden" name="bottles" value="${bottleId}:${quantity}">
-              <img src="${imageUrl}" alt="${bottleName}" class="w-10 h-10 rounded-full mr-2">
+              <img src="${imageUrl}" alt="${bottleName}" class="w-16 h-10 rounded-full mr-2">
               <span class="font-semibold">${bottleName}: ${quantity} Unidades</span>
               <button type="button" class="remove-bottle btn btn-secondary">x</button>
             </div>
@@ -314,4 +371,5 @@
     });
   });
 </script>
+
 {% endblock %}

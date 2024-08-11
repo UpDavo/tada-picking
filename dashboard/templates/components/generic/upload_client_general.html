@@ -2,7 +2,7 @@
 
 {% block content %}
   <div class="card bg-base-100 shadow-md flex justify-center items-center">
-    <form class="w-full card-body" action="{% url 'dashboard:stock_upload_general' %}" method="post" enctype="multipart/form-data">
+    <form class="w-full card-body" action="{% url 'dashboard:clients_upload_general' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       {% if error %}
         <div role="alert" class="alert alert-error">

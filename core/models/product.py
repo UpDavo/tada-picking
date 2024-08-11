@@ -1,5 +1,6 @@
 from django.db import models
 from .timeStampedModel import TimeStampedModel
+from core.utils.storage_backend import PublicUploadStorage
 
 
 class Product(TimeStampedModel):
@@ -9,7 +10,8 @@ class Product(TimeStampedModel):
     active = models.BooleanField(default=True)
     starred = models.BooleanField(default=False)
     is_fisical = models.BooleanField(default=False)
-    image = models.ImageField(upload_to='product_images/', null=True, blank=True)
+    image = models.ImageField(upload_to='product_images/',
+                              storage=PublicUploadStorage(), null=True, blank=True, default='')
 
     def __str__(self):
         return self.name

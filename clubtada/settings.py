@@ -108,13 +108,26 @@ USE_I18N = True
 USE_TZ = True
 
 MEDIA_PATH = os.path.abspath(os.path.dirname(__name__))
-MEDIA_URL = '/media/'
+# MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(MEDIA_PATH, 'media')
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(
     MEDIA_PATH, 'static'), os.path.join(MEDIA_PATH, 'media')]
 STATIC_ROOT = os.path.join(MEDIA_PATH, 'local-cdn', 'static')
+
+AWS_S3_REGION_NAME = 'us-east-2'
+AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME')
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/media/'
+
+# S3 Config
+AWS_ACCESS_KEY_ID = env.str('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env.str('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME')
+
+# Configuración de almacenamiento para S3
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'core.utils.storage_backend.PublicUploadStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
