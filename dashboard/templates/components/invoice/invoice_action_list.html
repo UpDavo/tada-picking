@@ -25,7 +25,7 @@
               <div class="badge bg-emerald-500 border-emerald-500 text-white">Aprobado</div>
             {% else %}
               {% if obj_data.4 == 'awaiting_approval' %}
-                <div class="badge badge-accent">Esperando Aprobación</div>
+                <div class="badge badge-accent">Pendiente</div>
               {% else %}
                 <div class="badge bg-emerald-500 border-emerald-500 text-white">Aprobado pero Incompleto</div>
               {% endif %}
@@ -71,7 +71,7 @@
             <div class="badge badge-md bg-emerald-500 border-emerald-500 text-white">Aprobado</div>
           {% else %}
             {% if obj_data.4 == 'awaiting_approval' %}
-              <div class="badge badge-md badge-accent">Esperando Aprobación</div>
+              <div class="badge badge-md badge-accent">Pendiente</div>
             {% else %}
               <div class="badge badge-md bg-emerald-500 border-emerald-500 text-white">Aprobado pero Incompleto</div>
             {% endif %}

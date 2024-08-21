@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.db import IntegrityError, transaction
 from openpyxl import Workbook
 from django.http import HttpResponse
+from core.utils.emailThread import EmailThread
 # from django.urls import reverse_lazy
 
 
@@ -187,6 +188,8 @@ class ClientService:
                     break
                 previous_quantity = rule.general_quantity
 
+            print(selected_rule)
+
             if selected_rule:
                 # Buscar el código del producto de la regla seleccionada en el stock
                 product_stock = Stock.objects.filter(
@@ -196,7 +199,6 @@ class ClientService:
                     # Asignar el código del stock a la orden
                     order.assigned_code = product_stock.code
                     order.is_confirmed = 'confirmed'
-                    order.save()
 
                     # Decrementar la cantidad en el stock
                     product_stock.quantity -= 1
@@ -207,11 +209,24 @@ class ClientService:
 
                     # Enviar email si el cliente tiene email
                     if client.email:
-                        order.is_email_sended = True
-                        order.save()
+                        subject = 'Su picking de botella le ha dado un cupón'
+                        email_data = {
+                            'code': order.assigned_code,
+                        }
+                        recipient_list = ['updavo@gmail.com']
+                        template = 'emails/assigned_code.html'
 
-                        # Placeholder para el envío de email
-                        # send_email_to_client(client.email, order)
+                        email_thread = EmailThread(
+                            subject, email_data, recipient_list, template)
+
+                        try:
+                            email_thread.start()
+                            order.is_email_sended = True
+                        except Exception as e:
+                            order.is_email_sended = False
+                            print("exception", e)
+
+                    order.save()
 
             else:
                 # No se encontró ninguna regla que coincida con la cantidad total de botellas

@@ -1,15 +1,16 @@
 from django.views.generic import TemplateView
-from django.shortcuts import render, redirect
-from core.models import Bottle, Invoice, Client, ClientOrders, Store
+from django.shortcuts import redirect
+from core.models import Bottle, Invoice, Client, Store
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from core.services.client_service import ClientService
-from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from core.utils.emailThread import EmailThread
+
 
 PERMISSION = 'dashboard:picking'
 
@@ -64,7 +65,6 @@ class PickingForm(TemplateView):
         bottle_quantities = {bottle.split(':')[0]: bottle.split(':')[
             1] for bottle in bottles}
 
-        # try:
         # Crear la factura
         invoice = Invoice.objects.create(
             store_id=store_id,
@@ -78,7 +78,24 @@ class PickingForm(TemplateView):
         # Crear la orden
         ClientService.createOrder(
             user_phone, invoice.order_id)
+
         messages.success(request, 'Orden creada exitosamente.')
+
+        subject = 'Su órden de picking ha sido creada exitosamente'
+        email_data = {
+            'order': invoice.order_id,
+        }
+        recipient_list = ['updavo@gmail.com']
+        template = 'emails/picking_complete.html'
+
+        email_thread = EmailThread(
+            subject, email_data, recipient_list, template)
+
+        try:
+            email_thread.start()
+        except Exception as e:
+            print("exception", e)
+
         # except IntegrityError:
         #     messages.error(
         #         request, f'Error al crear la factura.')

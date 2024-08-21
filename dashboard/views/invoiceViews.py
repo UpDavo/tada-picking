@@ -101,10 +101,9 @@ class UpdateInvoice(UpdateView):
         updated_bottles_data = form.cleaned_data.get('updated_bottles', None)
         order_id = form.cleaned_data.get('order_id', None)
         status = form.cleaned_data.get('status', None)
-        
+
         # ClientService.assignAndValidate(order_id)
 
-        
         if status == 'approved' or status == 'approved_but_incomplete':
             ClientService.assignAndValidate(order_id)
 

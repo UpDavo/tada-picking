@@ -97,7 +97,7 @@
           {% for bottle in botellas %}
           <option
             value="{{ bottle.id }}"
-            data-image="{% if bottle.image %}{{ bottle.image.url }}{% else %}URL_DE_IMAGEN_POR_DEFECTO{% endif %}"
+            data-image="{% if bottle.image %}{{ bottle.image.url }}{% else %}https://tada-picking.s3.amazonaws.com/public/bottle_images/images_71AujVx.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAS57KUSCBV2S4OKGL%2F20240821%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20240821T192712Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=c0e5736e72bd7cca025fc4c8092aade92fa7b7cfba03523c4023bd47c49946b9{% endif %}"
             data-min="{{ bottle.min_bottles }}"
           >
             {{ bottle.type }}

@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 from django.db.models import JSONField
 from .timeStampedModel import TimeStampedModel
@@ -6,6 +5,7 @@ from .store import Store
 from .client import Client  # Importar el modelo Client
 from .user import User
 from core.utils.storage_backend import PublicUploadStorage
+import datetime
 
 
 class Invoice(TimeStampedModel):
@@ -16,12 +16,8 @@ class Invoice(TimeStampedModel):
     ]
 
     # ID de Invoice único
-    # order_id = models.CharField(max_length=30, unique=True)
-
-    order_id = models.UUIDField(
-        default=uuid.uuid4,
-        editable=True,
-        unique=True,
+    order_id = models.CharField(
+        max_length=20, unique=True, editable=True
     )
 
     # Recogedor
@@ -52,8 +48,22 @@ class Invoice(TimeStampedModel):
     approval_comment = models.TextField(blank=True, null=True)
     updated_bottles = JSONField(blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        if not self.order_id:
+            today = datetime.date.today().strftime("%Y%m%d")
+            last_invoice = Invoice.objects.filter(
+                order_id__icontains=today).order_by('order_id').last()
+            if last_invoice:
+                last_id = int(last_invoice.order_id[-4:])
+                new_id = f"{today}-{str(last_id + 1).zfill(4)}"
+            else:
+                new_id = f"{today}-0001"
+            # Añadir un carácter especial para hacerlo menos obvio
+            self.order_id = f"INV-{new_id}"
+        super(Invoice, self).save(*args, **kwargs)
+
     def __str__(self):
-        return f"Invoice {self.invoice_id} for {self.client.ci} at {self.store.name}"
+        return f"Invoice {self.order_id} for {self.client.ci} at {self.store.name}"
 
     def approve(self):
         self.status = 'approved'
