@@ -15,6 +15,7 @@ class CreateRoleForm(forms.ModelForm):
         labels = {
             'name': 'Nombre del rol',
             'permissions': 'Permisos',
+            'all_countries': 'Todos los POCS'
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Nombre'}),

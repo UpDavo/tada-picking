@@ -1,0 +1,96 @@
+<div>
+  <div class="card bg-base-100 shadow-sm mb-4 rounded-md">
+    <div class="card-body overflow-hidden py-4 md:py-6">
+      <form method="GET" action="{% url list_url %}" id="filter_form">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="w-full">
+            <label for="name" class="block text-left mb-1">Buscar por {{busqueda}}:</label>
+            <input class="input input-bordered w-full pl-10" type="text" id="name" name="names" value="{{ search_name|default_if_none:'' }}" />
+          </div>
+          
+          {% if user.role.all_countries %}
+          <div class="w-full">
+            <label for="store" class="block text-left mb-1">Filtrar por poc:</label>
+            <select class="input input-bordered w-full" id="store" name="store">
+              <option value="">Todos los Pocs</option>
+              {% for store in stores %}
+                <option value="{{ store.id }}" {% if store.id == search_store %}selected{% endif %}>{{ store.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
+          <div class="w-full">
+            <label for="start_date" class="block text-left mb-1">Fecha de inicio:</label>
+            <input class="input input-bordered w-full" type="date" id="start_date" name="start_date" value="{{ search_start_date|default_if_none:'' }}" />
+          </div>
+
+          <div class="w-full">
+            <label for="end_date" class="block text-left mb-1">Fecha de fin:</label>
+            <input class="input input-bordered w-full" type="date" id="end_date" name="end_date" value="{{ search_end_date|default_if_none:'' }}" />
+          </div>
+
+          <div class="w-full">
+            <label for="status" class="block text-left mb-1">Estado:</label>
+            <select class="input input-bordered w-full" id="status" name="status">
+              <option value="">Todos</option>
+              <option value="approved" {% if search_status == 'approved' %}selected{% endif %}>Aprobado</option>
+              <option value="approved_but_incomplete" {% if search_status == 'approved_but_incomplete' %}selected{% endif %}>Aprobado con detalle</option>
+              <option value="awaiting_approval" {% if search_status == 'awaiting_approval' %}selected{% endif %}>Pendiente</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center mt-4">
+          <div class="flex gap-1">
+            <div class="tooltip" data-tip="Buscar">
+              <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+            <div class="tooltip" data-tip="Reiniciar">
+              <button class="btn btn-primary" type="button" onclick="resetForm()"><i class="fas fa-sync-alt"></i> Reiniciar</button>
+            </div>
+          </div>
+          <div>
+            <div>
+              <a href="#" id="download-excel" class="btn btn-primary btn-sm py-3 h-auto">
+                <i class="fas fa-download"></i>
+                Descargar Búsqueda en Excel
+              </a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('download-excel').addEventListener('click', function(e) {
+      e.preventDefault();
+
+      // Obtener los valores de los campos del formulario
+      const name = document.getElementById('name').value;
+      const store = document.getElementById('store') ? document.getElementById('store').value : '';
+      const startDate = document.getElementById('start_date').value;
+      const endDate = document.getElementById('end_date').value;
+      const status = document.getElementById('status').value;
+
+      // Construir la URL de descarga con los parámetros
+      let url = "{% url 'dashboard:invoice_download_excel' %}?";
+      if (name) url += `names=${encodeURIComponent(name)}&`;
+      if (store) url += `store=${encodeURIComponent(store)}&`;
+      if (startDate) url += `start_date=${encodeURIComponent(startDate)}&`;
+      if (endDate) url += `end_date=${encodeURIComponent(endDate)}&`;
+      if (status) url += `status=${encodeURIComponent(status)}`;
+
+      // Redirigir a la URL construida
+      window.location.href = url;
+    });
+
+    function resetForm() {
+      document.getElementById('filter_form').reset();
+      const url = new URL(window.location.href);
+      url.search = '';
+      window.location.href = url.toString();
+    }
+  </script>
+</div>

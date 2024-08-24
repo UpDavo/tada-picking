@@ -34,21 +34,35 @@ class InvoiceList(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Obtener los valores de búsqueda desde los GET parameters
         name = self.request.GET.get('names')
+        store = self.request.GET.get('store')
+        status = self.request.GET.get('status')
+        start = self.request.GET.get('start_date')
+        end = self.request.GET.get('end_date')
 
-        page_obj, fields, object_data, list_url, description_url, view_url = InvoiceService.getInvoiceList(
-            self.request, name)
+        # Llamar al servicio para obtener los datos
+        page_obj, fields, object_data, list_url, description_url, view_url, stores = InvoiceService.getInvoiceList(
+            self.request, name, store, start, end, status)
 
         # Pasar los datos de los objetos y los campos al contexto
         context['nombre'] = "Picking"
         context['busqueda'] = "número de orden"
-        context['key'] = "downloadTable"
+        context['key'] = "none"
         context['fields'] = fields
         context['object_data'] = object_data
         context['page_obj'] = page_obj
         context['description_url'] = description_url
         context['view_url'] = view_url
         context['list_url'] = list_url
+        context['stores'] = stores
+        context['user'] = self.request.user
+
+        # Pasar los valores de búsqueda al contexto para que se muestren en los campos de búsqueda
+        context['search_name'] = name
+        context['search_store'] = store
+        context['search_start_date'] = start
+        context['search_end_date'] = end
 
         return context
 
@@ -58,7 +72,11 @@ class DownloadExcel(View):
 
     def get(self, request, *args, **kwargs):
         df = InvoiceService.get_excel_data(
-            self.request, order_id=request.GET.get('names'))
+            self.request, order_id=request.GET.get('names'),
+            store=self.request.GET.get('store'),
+            start=self.request.GET.get('start_date'),
+            end=self.request.GET.get('end_date'),
+            status=self.request.GET.get('status'))
 
         # Crear un archivo Excel en memoria
         excel_buffer = io.BytesIO()
