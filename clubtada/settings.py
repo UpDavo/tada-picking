@@ -132,7 +132,7 @@ EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
 EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env.int('EMAIL_PORT')
-EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL')
+# EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL')
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
 
 # Configuración de almacenamiento para S3
