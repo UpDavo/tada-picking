@@ -10,7 +10,7 @@ class User(AbstractUser, TimeStampedModel):
     names = models.CharField(max_length=45)
     ci = models.IntegerField(default=0)
     role = models.ForeignKey(
-        Role, on_delete=models.CASCADE, null=True, blank=True)
+        Role, on_delete=models.PROTECT, null=True, blank=True)
     store = models.ForeignKey(
         Store, on_delete=models.PROTECT, null=True, blank=True)
     total_points = models.IntegerField(default=0)

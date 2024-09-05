@@ -15,22 +15,28 @@ class Invoice(TimeStampedModel):
         ('approved_but_incomplete', 'Aprobado con Detalle'),
     ]
 
-    # ID de Invoice único
-    order_id = models.CharField(
-        max_length=20, unique=True, editable=True
-    )
+    order_id = models.CharField(max_length=20, unique=True, editable=True)
 
-    # Recogedor
+    # Recogedor (picker), con opción de que quede nulo si el usuario es eliminado
     picker = models.ForeignKey(
-        User, on_delete=models.CASCADE, default=1)
+        User, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # Cliente
+    # Nombre del picker (almacenado como histórico)
+    picker_name = models.CharField(max_length=255, blank=True, null=True)
+
+    # Cliente (permite null cuando el cliente es eliminado)
     client = models.ForeignKey(
-        Client, on_delete=models.CASCADE, default=2)
+        Client, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # Tienda
-    # default ID para tienda
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, default=1)
+    # Nombre del cliente (almacenado como histórico)
+    client_name = models.CharField(max_length=255, blank=True, null=True)
+
+    # Tienda (permite null cuando la tienda es eliminada)
+    store = models.ForeignKey(
+        Store, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Nombre de la tienda (almacenado como histórico)
+    store_name = models.CharField(max_length=255, blank=True, null=True)
 
     # Detalles
     description = models.CharField(max_length=150, default='Ninguno')
@@ -49,6 +55,21 @@ class Invoice(TimeStampedModel):
     updated_bottles = JSONField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        # Si el picker está presente, guarda su nombre como histórico
+        if self.picker:
+            # Almacenar el nombre del picker como histórico
+            self.picker_name = self.picker.names
+
+        # Si la tienda está presente, guarda su nombre como histórico
+        if self.store:
+            # Almacenar el nombre de la tienda como histórico
+            self.store_name = self.store.name
+
+        # Si el cliente está presente, guarda su nombre como histórico
+        if self.client:
+            # Almacenar el nombre del cliente (puedes cambiar a nombre)
+            self.client_name = self.client.ci
+
         if not self.order_id:
             today = datetime.date.today().strftime("%Y%m%d")
             last_invoice = Invoice.objects.filter(
@@ -58,12 +79,12 @@ class Invoice(TimeStampedModel):
                 new_id = f"{today}-{str(last_id + 1).zfill(4)}"
             else:
                 new_id = f"{today}-0001"
-            # Añadir un carácter especial para hacerlo menos obvio
             self.order_id = f"INV-{new_id}"
+
         super(Invoice, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"Invoice {self.order_id} for {self.client.ci} at {self.store.name}"
+        return f"Invoice {self.order_id} for {self.client_name or 'N/A'} at {self.store_name or 'N/A'}"
 
     def approve(self):
         self.status = 'approved'
