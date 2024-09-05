@@ -16,7 +16,7 @@ PERMISSION = 'dashboard:picking'
 
 
 class PickingForm(TemplateView):
-    template_name = 'pages/picking/form_picking_page.html'
+    template_name = 'pages/picking/form_picking_page_bundle.html'
 
     def dispatch(self, request, *args, **kwargs):
         if settings.LOCAL:
@@ -45,11 +45,11 @@ class PickingForm(TemplateView):
         description = request.POST.get('description')
         product_photo = request.FILES.get('product_photo')
         bottles = request.POST.getlist('bottles')
-        user_phone = request.POST.get('user_phone')
+        user_email = request.POST.get('user_email')
         quantity_limit = 3
 
         # Verificar límite de pedidos
-        if not ClientService.checkUses(quantity_limit, user_phone):
+        if not ClientService.checkUses(quantity_limit, user_email):
             messages.error(
                 request, f'El cliente ya hizo el límite de {quantity_limit} pedidos al mes')
             return self.get(request, *args, **kwargs)
@@ -65,11 +65,13 @@ class PickingForm(TemplateView):
         bottle_quantities = {bottle.split(':')[0]: bottle.split(':')[
             1] for bottle in bottles}
 
+        client = Client.objects.filter(email=user_email).first()
+
         # Crear la factura
         invoice = Invoice.objects.create(
             store_id=store_id,
             picker=picker,
-            client=Client.objects.filter(phone_number=user_phone).first(),
+            client=client,
             description=description,
             product_photo=product_photo,
             bottles=bottle_quantities
@@ -77,7 +79,7 @@ class PickingForm(TemplateView):
 
         # Crear la orden
         ClientService.createOrder(
-            user_phone, invoice.order_id)
+            user_email, invoice.order_id)
 
         messages.success(request, 'Orden creada exitosamente.')
 
@@ -85,7 +87,7 @@ class PickingForm(TemplateView):
         email_data = {
             'order': invoice.order_id,
         }
-        recipient_list = ['updavo@gmail.com']
+        recipient_list = [client.email]
         template = 'emails/picking_complete.html'
 
         email_thread = EmailThread(
@@ -132,11 +134,11 @@ def verificar_celular(request):
         except json.JSONDecodeError:
             return JsonResponse({'verificado': False, 'mensaje': 'Formato de datos no válido'}, status=400)
 
-        numero_celular = data.get('numero', None)
+        correo = data.get('correo', None)
 
-        if numero_celular:
+        if correo:
             # print(f"Número de celular recibido: {numero_celular}")
-            client = Client.objects.filter(phone_number=numero_celular).first()
+            client = Client.objects.filter(email=correo).first()
 
             if client:
                 # El número está registrado

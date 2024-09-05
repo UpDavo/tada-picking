@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from core.models import Client, ClientOrders, Invoice, PackRule, Stock
+from core.models import ClientOrders, Invoice, PackRule, Stock, Bottle, BottleQuantity, Client
 from django.utils import timezone
 from django.db import IntegrityError, transaction
 from openpyxl import Workbook
@@ -21,7 +21,7 @@ class ClientService:
         # Obtener los campos del modelo Usuario como una lista de objetos Field
         fields = Client._meta.fields
         fields_to_include = ['id', 'created_at',
-                             'name', 'phone_number', 'email']
+                             'ci', 'name', 'email']
         fields = [field for field in fields if field.name in fields_to_include]
 
         # Paginar los usuarios
@@ -70,7 +70,7 @@ class ClientService:
         return page_obj, fields, object_data, list_url
 
     @staticmethod
-    def checkUses(quantity, user_phone):
+    def checkUses(quantity, user_email):
         # Obtener la fecha actual
         now = timezone.now()
 
@@ -79,7 +79,7 @@ class ClientService:
 
         # Filtrar las órdenes del cliente creadas desde el primer día del mes actual
         orders = ClientOrders.objects.filter(
-            client__phone_number=user_phone,
+            client__email=user_email,
             created_at__gte=first_day_of_month
         )
 
@@ -109,10 +109,10 @@ class ClientService:
             return f"Error: {str(e)}"
 
     @staticmethod
-    def createOrder(user_phone, order_number, assigned_code=None, is_email_sended=False):
+    def createOrder(user_email, order_number, assigned_code=None, is_email_sended=False):
         try:
             # Obtener el cliente por CI
-            client = Client.objects.get(phone_number=user_phone)
+            client = Client.objects.get(email=user_email)
 
             # Crear una nueva instancia de ClientOrders
             with transaction.atomic():
@@ -162,41 +162,59 @@ class ClientService:
                 return
 
             invoice = Invoice.objects.filter(order_id=order_id).first()
-            rules = PackRule.objects.all()
             client = order.client
 
-            # Convertir las cantidades de strings a enteros
+            # Botellas del pedido
             bottles = invoice.bottles
-            total_bottles = sum(int(quantity) for quantity in bottles.values())
 
-            # Filtrar las reglas generales y ordenarlas por general_quantity
-            general_rules = sorted(
-                [rule for rule in rules if rule.is_general],
-                key=lambda r: r.general_quantity
-            )
+            # Crear una lista para almacenar las botellas y sus cantidades
+            bottles_with_quantities = []
 
-            # Encontrar la regla que hace match con total_bottles
+            # Recorrer el diccionario de botellas del pedido y buscar las botellas por su ID
+            for bottle_id, quantity in bottles.items():
+                try:
+                    # Buscar la instancia de Bottle por su ID y convertir la cantidad a entero
+                    bottle = Bottle.objects.get(id=bottle_id)
+                    quantity = int(quantity)
+                    bottles_with_quantities.append(
+                        {'bottle': bottle, 'quantity': quantity})
+                except Bottle.DoesNotExist:
+                    print(f'Bottle with ID {bottle_id} does not exist')
+
+            # Reglas (PackRules)
+            rules = PackRule.objects.all()
+
+            # Variable para almacenar la primera regla coincidente
             selected_rule = None
-            previous_quantity = None
 
-            for rule in general_rules:
-                if rule.general_quantity == total_bottles:
+            # Recorrer todas las PackRules y detenerse cuando se encuentre la primera coincidencia
+            for rule in rules:
+                rule_bottles = BottleQuantity.objects.filter(pack_rule=rule)
+
+                match = True
+                for order_bottle in bottles_with_quantities:
+                    # Verificar si la botella del pedido coincide con la botella de la regla
+                    matching_bottle = rule_bottles.filter(
+                        bottle=order_bottle['bottle']).first()
+                    if not matching_bottle or matching_bottle.quantity != order_bottle['quantity']:
+                        match = False
+                        break
+
+                if match:
                     selected_rule = rule
                     break
-                elif previous_quantity is not None and previous_quantity <= total_bottles < rule.general_quantity:
-                    selected_rule = rule
-                    break
-                previous_quantity = rule.general_quantity
 
-            print(selected_rule)
-
+            # Si se encuentra una regla coincidente, procesar el stock y enviar el email
             if selected_rule:
-                # Buscar el código del producto de la regla seleccionada en el stock
+                print(
+                    f'Regla coincidente para el pedido {order_id}: {selected_rule.name} (Producto: {selected_rule.product.name})')
+
                 product_stock = Stock.objects.filter(
                     product=selected_rule.product).first()
 
                 if product_stock and product_stock.quantity > 0:
                     # Asignar el código del stock a la orden
+                    print(product_stock.code)
                     order.assigned_code = product_stock.code
                     order.is_confirmed = 'confirmed'
 
@@ -210,10 +228,8 @@ class ClientService:
                     # Enviar email si el cliente tiene email
                     if client.email:
                         subject = 'Su picking de botella le ha dado un cupón'
-                        email_data = {
-                            'code': order.assigned_code,
-                        }
-                        recipient_list = ['updavo@gmail.com']
+                        email_data = {'code': product_stock.code}
+                        recipient_list = [client.email]
                         template = 'emails/assigned_code.html'
 
                         email_thread = EmailThread(
@@ -224,13 +240,11 @@ class ClientService:
                             order.is_email_sended = True
                         except Exception as e:
                             order.is_email_sended = False
-                            print("exception", e)
+                            print("Exception while sending email:", e)
 
                     order.save()
-
             else:
-                # No se encontró ninguna regla que coincida con la cantidad total de botellas
-                return
+                print(f'No hay reglas coincidentes para el pedido {order_id}.')
 
         except ClientOrders.DoesNotExist:
             # La orden con ID no existe
@@ -243,7 +257,7 @@ class ClientService:
         ws = wb.active
 
         # Definir los títulos de las columnas
-        columns = ['ci', 'nombre', 'email', 'celular']
+        columns = ['ci', 'nombre', 'email']
         ws.append(columns)
 
         # Guardar el libro en un objeto de respuesta HTTP
@@ -258,7 +272,6 @@ class ClientService:
         # Renombrar columnas para que coincidan con los campos del modelo Client
         df.rename(columns={
             'nombre': 'name',
-            'celular': 'phone_number',
             'ci': 'ci',
             'email': 'email'
         }, inplace=True)
@@ -266,40 +279,32 @@ class ClientService:
         # Convertir todas las columnas del DataFrame a tipo string
         df = df.astype(str)
 
+        # Filtrar los emails que no son None o vacíos
+        df = df[df['email'].notna() & df['email'].str.strip().ne('')]
+
         # Obtener todos los CIs de los clientes existentes y convertirlos a strings
         existing_cis = set(str(ci)
                            for ci in Client.objects.values_list('ci', flat=True))
 
+        # Obtener todos los emails de los clientes existentes y convertirlos a strings
+        existing_emails = set(
+            str(email) for email in Client.objects.values_list('email', flat=True))
+
         # Filtrar el DataFrame para eliminar filas con CIs existentes
         df_filtered = df[~df['ci'].isin(existing_cis)]
 
-        # Función para transformar el número de teléfono
-        def transform_phone_number(phone_number):
-            # Si el número de teléfono comienza con +593, reemplazarlo por 0
-            if phone_number.startswith('+593'):
-                phone_number = '0' + phone_number[4:]
-            # Si comienza con el código de país sin el '+', también reemplazarlo
-            elif phone_number.startswith('593'):
-                phone_number = '0' + phone_number[3:]
-            # Asegurarse de que el número de teléfono tenga exactamente 10 dígitos
-            if len(phone_number) == 10 and phone_number.startswith('09'):
-                return phone_number
-            # Si no cumple con el formato, retornamos None para indicar que es inválido
-            return None
-
-        # Aplicar la transformación a la columna de números de teléfono
-        df_filtered['phone_number'] = df_filtered['phone_number'].apply(
-            transform_phone_number)
+        # Filtrar el DataFrame para eliminar filas con emails existentes
+        df_filtered = df_filtered[~df_filtered['email'].isin(existing_emails)]
 
         # Crear una lista de instancias de clientes que necesitan ser creadas
         clients_to_create = [
             Client(
                 ci=row['ci'],
                 name=row['name'],
-                phone_number=row['phone_number'],
                 email=row['email']
             )
-            for _, row in df_filtered.iterrows() if row['phone_number'] is not None
+            # Solo iteramos sobre los registros filtrados
+            for _, row in df_filtered.iterrows()
         ]
 
         # Insertar todos los nuevos clientes en la base de datos en un solo paso

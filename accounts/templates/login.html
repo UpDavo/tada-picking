@@ -33,9 +33,9 @@
             <div class="w-full">{{ form.username }}</div>
             <div class="w-full">{{ form.password }}</div>
             <button type="submit" class="btn btn-primary btn-block mt-2">Iniciar Sesión</button>
-            <div class="w-full text-center mt-2">
+            {% comment %} <div class="w-full text-center mt-2">
               <a href="{% url 'accounts:password_reset' %}">¿Olvidaste tu contraseña?</a>
-            </div>
+            </div> {% endcomment %}
           </div>
         </form>
       </div>

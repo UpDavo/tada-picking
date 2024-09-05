@@ -67,7 +67,7 @@ class UploadClients(TemplateView):
         return render(request, self.template_name, {'nombre': 'Cargar Clientes'})
 
     def post(self, request, *args, **kwargs):
-        expected_cols = ['ci', 'nombre', 'email', 'celular']
+        expected_cols = ['ci', 'nombre', 'email']
         if 'file' not in request.FILES:
             return render(request, self.template_name, {'nombre': 'Cargar Clientes', 'error': True})
 

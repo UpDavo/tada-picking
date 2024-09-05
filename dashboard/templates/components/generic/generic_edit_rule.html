@@ -84,46 +84,10 @@
 
 <script>
     $(document).ready(function () {
-        function toggleQuantityFields() {
-            if ($('#id_is_general').is(':checked')) {
-                $('#general-quantity-field').show();
-                $('.bottle-quantity-field').hide();
-                $('.bottle-checkbox-field').hide();
-            } else {
-                $('#general-quantity-field').hide();
-                $('.bottle-checkbox-field').show();
-                // Show/hide individual quantity fields based on bottle selection
-                $('.bottle-quantity-field').each(function() {
-                    const bottleCheckbox = $(`input[name="bottles"][value="${$(this).attr('id').split('-').pop()}"]`);
-                    if (bottleCheckbox.is(':checked')) {
-                        $(this).removeClass('hidden');
-                    } else {
-                        $(this).addClass('hidden');
-                    }
-                });
-            }
-        }
-
-        // Ejecutar la función al cambiar el estado del checkbox
-        $('#id_is_general').on('change', toggleQuantityFields);
-
-        // Inicializar el estado de los campos al cargar la página
-        toggleQuantityFields();
-
-        // Obtener todos los checkboxes de botella
+        // Mostrar u ocultar las cantidades seleccionadas al cargar la página
         const bottleCheckboxes = $('input[type="checkbox"][name="bottles"]');
-
-        // Añadir event listener para mostrar/ocultar campos de cantidad
-        bottleCheckboxes.on('change', function () {
-            const quantityFieldId = `#quantity-bottle_${$(this).val()}_quantity`;
-            if ($(this).is(':checked')) {
-                $(quantityFieldId).removeClass('hidden');
-            } else {
-                $(quantityFieldId).addClass('hidden');
-            }
-        });
-
-        // Comprobación inicial para mostrar las cantidades seleccionadas
+        
+        // Itera sobre los checkboxes para mostrar las cantidades
         bottleCheckboxes.each(function () {
             const quantityFieldId = `#quantity-bottle_${$(this).val()}_quantity`;
             if ($(this).is(':checked')) {
@@ -132,6 +96,31 @@
                 $(quantityFieldId).addClass('hidden');
             }
         });
+    
+        // Evento para mostrar/ocultar campos de cantidad cuando se seleccionan botellas
+        bottleCheckboxes.on('change', function () {
+            const quantityFieldId = `#quantity-bottle_${$(this).val()}_quantity`;
+            if ($(this).is(':checked')) {
+                $(quantityFieldId).removeClass('hidden');
+            } else {
+                $(quantityFieldId).addClass('hidden');
+            }
+        });
+    
+        // Toggle fields based on whether the rule is general or specific
+        $('#id_is_general').on('change', toggleQuantityFields);
+        toggleQuantityFields();
     });
+    
+    function toggleQuantityFields() {
+        if ($('#id_is_general').is(':checked')) {
+            $('#general-quantity-field').show();
+            $('.bottle-quantity-field').hide();
+            $('.bottle-checkbox-field').hide();
+        } else {
+            $('#general-quantity-field').hide();
+            $('.bottle-checkbox-field').show();
+        }
+    }
 </script>
 {% endblock %}

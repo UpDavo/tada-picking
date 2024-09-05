@@ -83,7 +83,7 @@
       </div>
     </div>
 
-    <div class="form-group mt-4 flex items-end space-x-4 mb-4">
+    <div class="form-group gap-2 mt-4 flex items-end space-x-4 mb-4">
       <div class="flex-grow">
         <label class="text-md font-bold" for="bottle-select"
           >Añadir Botellas</label
@@ -99,6 +99,7 @@
             value="{{ bottle.id }}"
             data-image="{% if bottle.image %}{{ bottle.image.url }}{% else %}https://tada-picking.s3.amazonaws.com/public/bottle_images/images_71AujVx.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAS57KUSCBV2S4OKGL%2F20240821%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20240821T192712Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=c0e5736e72bd7cca025fc4c8092aade92fa7b7cfba03523c4023bd47c49946b9{% endif %}"
             data-min="{{ bottle.min_bottles }}"
+            data-range="{{ bottle.bottle_range }}"
           >
             {{ bottle.type }}
           </option>
@@ -169,12 +170,12 @@
   $(document).ready(function () {
     const maxBottles = {{ max_bottles }};
     let totalBottles = 0;
-
+  
     const submitButton = $("#submit-button");
-
+  
     // Deshabilitar el botón de envío inicialmente
     submitButton.prop("disabled", true);
-
+  
     // Mostrar el swal al cargar la página
     Swal.fire({
       title: 'Ingrese el correo del cliente',
@@ -240,7 +241,7 @@
         });
       }
     });
-
+  
     $("#product_photo").change(function () {
       const file = this.files[0];
       if (file) {
@@ -253,12 +254,18 @@
         reader.readAsDataURL(file);
       }
     });
-
+  
     $("#bottle-select").change(function() {
       const selectedOption = this.options[this.selectedIndex];
       const imageUrl = $(selectedOption).data('image');
       const minQuantity = $(selectedOption).data('min');
-      $("#bottle-quantity").attr("min", minQuantity).attr("step", minQuantity).val(minQuantity);
+      const minRange = $(selectedOption).data('range');
+      
+      $("#bottle-quantity")
+        .attr("min", minQuantity)
+        .attr("step", minRange)  // Usar el rango como paso en la cantidad
+        .val(minQuantity);  // Establecer el valor inicial en la cantidad mínima
+      
       if (imageUrl) {
         $("#bottle-image").attr("src", imageUrl).removeClass("hidden");
         $("#bottle-image-container").removeClass("hidden");
@@ -267,40 +274,49 @@
         $("#bottle-image-container").addClass("hidden");
       }
     });
-
+  
     // Inicializar la imagen con la primera opción si existe
     if ($("#bottle-select option").length > 0) {
       const firstOption = $("#bottle-select option:first");
       const initialImageUrl = firstOption.data('image');
       const initialMinQuantity = firstOption.data('min');
-      $("#bottle-quantity").attr("min", initialMinQuantity).attr("step", initialMinQuantity).val(initialMinQuantity);
+      const initialMinRange = firstOption.data('range');
+      
+      $("#bottle-quantity")
+        .attr("min", initialMinQuantity)
+        .attr("step", initialMinRange)
+        .val(initialMinQuantity);
+      
       if (initialImageUrl) {
         $("#bottle-image").attr("src", initialImageUrl).removeClass("hidden");
         $("#bottle-image-container").removeClass("hidden");
       }
     }
-
+  
     $("#add-bottle").click(function () {
       let bottleId = $("#bottle-select").val();
       let bottleName = $("#bottle-select option:selected").text();
       let quantity = parseInt($("#bottle-quantity").val(), 10);
       let minQuantity = parseInt($("#bottle-select option:selected").data('min'), 10);
+      let minRange = parseInt($("#bottle-select option:selected").data('range'), 10);
       let imageUrl = $("#bottle-select option:selected").data('image');
-
-      if (!quantity || quantity < minQuantity || quantity % minQuantity !== 0) {
-        $("#error-message span").text(`La cantidad para ${bottleName} debe ser un múltiplo de ${minQuantity}.`);
+  
+      // Validar la cantidad
+      if (!quantity || quantity < minQuantity || (quantity - minQuantity) % minRange !== 0) {
+        $("#error-message span").text(`La cantidad para ${bottleName} debe ser al menos ${minQuantity} y en incrementos de ${minRange}.`);
         $("#error-message").removeClass("hidden");
         return;
       }
-
+  
+      // Validar la cantidad máxima
       if (totalBottles + quantity > maxBottles) {
         $("#error-message span").text(`El total de botellas no puede exceder de ${maxBottles}.`);
         $("#error-message").removeClass("hidden");
         return;
       }
-
+  
       let existingBottle = $(`input[name="bottles"][value^="${bottleId}:"]`);
-
+  
       if (existingBottle.length > 0) {
         $("#error-message span").text('No se puede añadir la misma botella nuevamente. Elimine la botella existente primero.');
         $("#error-message").removeClass("hidden");
@@ -309,28 +325,28 @@
         if (bottleId && quantity) {
           totalBottles += quantity;
           $("#bottle-list").append(`
-            <div class="bottle-item flex justify-between items-center bg-gray-100 rounded mb-3">
+            <div class="bottle-item flex justify-between items-center bg-gray-100 rounded mb-3 border-2">
               <input type="hidden" name="bottles" value="${bottleId}:${quantity}">
               <img src="${imageUrl}" alt="${bottleName}" class="w-16 h-10 rounded-full mr-2">
               <span class="font-semibold">${bottleName}: ${quantity} Unidades</span>
               <button type="button" class="remove-bottle btn btn-secondary">x</button>
             </div>
-            <div class="divider"></div>
+           
           `);
         }
       }
     });
-
+  
     $(document).on("click", ".remove-bottle", function () {
       const quantityToRemove = parseInt($(this).siblings('input[name="bottles"]').val().split(':')[1], 10);
       totalBottles -= quantityToRemove;
       $(this).closest(".bottle-item").remove();
       $("#error-message").addClass("hidden");
     });
-
+  
     $("#submit-button").click(function () {
       let formIsValid = true;
-
+  
       // Verificar que se haya agregado al menos una botella
       if ($("#bottle-list .bottle-item").length === 0) {
         $("#no-bottle-error").removeClass("hidden");
@@ -338,7 +354,7 @@
       } else {
         $("#no-bottle-error").addClass("hidden");
       }
-
+  
       // Verificar que todos los campos requeridos estén completos
       $("#bottle-form input[required], #bottle-form select[required]").each(function() {
         const errorMessage = $(this).siblings('.error-message');
@@ -351,7 +367,7 @@
           errorMessage.addClass('hidden');
         }
       });
-
+  
       if (formIsValid) {
         Swal.fire({
           title: "¿Estás seguro?",
@@ -370,6 +386,7 @@
       }
     });
   });
+  
 </script>
 
 {% endblock %}
