@@ -5,6 +5,7 @@ from django.db import IntegrityError, transaction
 from openpyxl import Workbook
 from django.http import HttpResponse
 from core.utils.emailThread import EmailThread
+import pytz
 # from django.urls import reverse_lazy
 
 
@@ -155,6 +156,20 @@ class ClientService:
     @staticmethod
     def assignAndValidate(order_id):
         try:
+            ecuador_tz = pytz.timezone('America/Guayaquil')
+
+            # Obtener la fecha y hora actual en la zona horaria de Ecuador
+            current_datetime = timezone.now().astimezone(ecuador_tz)
+
+            # Formatear la fecha y la hora
+            months = {
+                1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio",
+                7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+            }
+
+            # Formatear la fecha en el formato deseado
+            formatted_date = f"{current_datetime.day} de {months[current_datetime.month]} del {current_datetime.year} a las {current_datetime.strftime('%H:%M')}"
+
             order = ClientOrders.objects.filter(order_number=order_id).first()
 
             # Verificar si la orden ya tiene un código asignado
@@ -180,6 +195,9 @@ class ClientService:
                         {'bottle': bottle, 'quantity': quantity})
                 except Bottle.DoesNotExist:
                     print(f'Bottle with ID {bottle_id} does not exist')
+
+            bottles_array = [
+                f"{bottle['quantity']} - {bottle['bottle']}" for bottle in bottles_with_quantities]
 
             # Reglas (PackRules)
             rules = PackRule.objects.all()
@@ -228,7 +246,15 @@ class ClientService:
                     # Enviar email si el cliente tiene email
                     if client.email:
                         subject = 'Su picking de botella le ha dado un cupón'
-                        email_data = {'code': product_stock.code}
+                        email_data = {
+                            'nombre': client.name,
+                            'order_id': invoice.order_id,
+                            'code':  product_stock.code,
+                            'value': selected_rule.product.name,
+                            'picker_name': invoice.picker.names,
+                            'pick_date': formatted_date,
+                            'bottles': bottles_array
+                        }
                         recipient_list = [client.email]
                         template = 'emails/assigned_code.html'
 

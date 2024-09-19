@@ -10,7 +10,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from core.utils.emailThread import EmailThread
-
+from django.utils import timezone
+import pytz
 
 PERMISSION = 'dashboard:picking'
 
@@ -48,6 +49,20 @@ class PickingForm(TemplateView):
         user_email = request.POST.get('user_email')
         quantity_limit = 3
 
+        ecuador_tz = pytz.timezone('America/Guayaquil')
+
+        # Obtener la fecha y hora actual en la zona horaria de Ecuador
+        current_datetime = timezone.now().astimezone(ecuador_tz)
+
+        # Formatear la fecha y la hora
+        months = {
+            1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio",
+            7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+        }
+
+        # Formatear la fecha en el formato deseado
+        formatted_date = f"{current_datetime.day} de {months[current_datetime.month]} del {current_datetime.year} a las {current_datetime.strftime('%H:%M')}"
+
         # Verificar límite de pedidos
         if not ClientService.checkUses(quantity_limit, user_email):
             messages.error(
@@ -77,6 +92,25 @@ class PickingForm(TemplateView):
             bottles=bottle_quantities
         )
 
+        bottles = invoice.bottles
+
+        # Crear una lista para almacenar las botellas y sus cantidades
+        bottles_with_quantities = []
+
+        # Recorrer el diccionario de botellas del pedido y buscar las botellas por su ID
+        for bottle_id, quantity in bottles.items():
+            try:
+                # Buscar la instancia de Bottle por su ID y convertir la cantidad a entero
+                bottle = Bottle.objects.get(id=bottle_id)
+                quantity = int(quantity)
+                bottles_with_quantities.append(
+                    {'bottle': bottle, 'quantity': quantity})
+            except Bottle.DoesNotExist:
+                print(f'Bottle with ID {bottle_id} does not exist')
+
+        bottles_array = [
+            f"{bottle['quantity']} - {bottle['bottle']}" for bottle in bottles_with_quantities]
+
         # Crear la orden
         ClientService.createOrder(
             user_email, invoice.order_id)
@@ -85,7 +119,13 @@ class PickingForm(TemplateView):
 
         subject = 'Su órden de picking ha sido creada exitosamente'
         email_data = {
-            'order': invoice.order_id,
+            'nombre': client.name,
+            'order_id': invoice.order_id,
+            'code': '',
+            'value': 0,
+            'picker_name': picker.names,
+            'pick_date': formatted_date,
+            'bottles': bottles_array
         }
         recipient_list = [client.email]
         template = 'emails/picking_complete.html'
