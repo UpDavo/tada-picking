@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Puntos Procesados</title>
+    <title>Código Asignado</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -19,34 +20,56 @@
         padding: 20px;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .logo {
+        background-color: #491eff;
+        color: #ffffff;
+        text-align: center;
+        padding: 10px 0;
+        border-radius: 5px 5px 0 0;
+      }
+      .logo img {
+        max-height: 50px;
       }
       .header {
         text-align: center;
-        padding: 20px 0;
+        padding: 10px;
         background-color: #491eff;
-        color: #ffffff;
-        border-radius: 5px 5px 0 0;
-      }
-      .header h1 {
-        margin: 0;
-        font-size: 24px;
+        color: #ffffff !important;
+        font-size: 25px;
+        font-weight: bold;
+        text-decoration: none !important;
+        border-bottom: 5px solid #ffc22d;
       }
       .content {
         padding: 20px;
-        text-align: center;
-      }
-      .content p {
         font-size: 16px;
         color: #333333;
-        line-height: 1.5;
+        background-color: #f9f9f9;
+        line-height: 1.7;
       }
-      .coupon {
+      .content h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .order-number {
         background-color: #ffc22d;
         padding: 15px;
         border-radius: 5px;
         color: #491eff;
         font-weight: bold;
         margin: 20px 0;
+        display: inline-block;
+        font-size: 18px;
+      }
+      .content ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+      }
+      .content ul li {
+        margin: 5px 0;
       }
       .footer {
         text-align: center;
@@ -55,24 +78,30 @@
         color: #ffffff;
         border-radius: 0 0 5px 5px;
         font-size: 12px;
+        text-decoration: none !important;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <h1>Tada Delivery</h1>
+      <div class="logo">
+        <img
+          src="https://tadadelivery.com/_next/image?url=%2Fimages%2Fagegate%2Ftada.png&w=384&q=75"
+          alt="TADA Retorna Logo"
+        />
       </div>
+      <div class="header">TADA Retorna</div>
       <div class="content">
-        <p>¡Hola!</p>
+        <p>Hola <strong>{{email_data.nombre}}</strong>,</p>
         <p>
-          Sus puntos del picking fueron procesados. Agregue el siguiente cupón
-          para gozar de sus beneficios:
+          Tu devolución con Código <span class="highlight">{{email_data.order_id}}</span> fue procesada con éxito. Hemos creado este cupón por 
+          <strong>${{email_data.value}}</strong> para que lo puedas disfrutar en tu siguiente compra en TADA.
         </p>
-        <div class="coupon">{{ email_data.code }}</div>
+        <div class="order-number">{{email_data.code}}</div>
+        <p>Recuerda que en caso de dudas puedes contactarnos al 1800-012345</p>
       </div>
       <div class="footer">
-        <p>&copy; 2024 Tada Delivery. Todos los derechos reservados.</p>
+        &copy; 2024 TADARetorna.com.ec Todos los derechos reservados.
       </div>
     </div>
   </body>

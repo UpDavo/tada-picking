@@ -135,3 +135,5 @@ local-cdn/
 package-lock.json
 package.json
 tailwind.config.js
+
+*.xlsx
