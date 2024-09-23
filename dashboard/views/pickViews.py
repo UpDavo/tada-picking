@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 from django.shortcuts import redirect
-from core.models import Bottle, Invoice, Client, Store
+from core.models import Bottle, Invoice, Client, Store, Product
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
@@ -33,8 +33,13 @@ class PickingForm(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        productos = Product.objects.all()
+        pricing_list = [float(producto.price) for producto in productos]
+
         context['nombre'] = 'Crear Picking'
         context['botellas'] = Bottle.objects.all()
+        context['precios'] = pricing_list
         context['stores'] = Store.objects.filter(name=self.request.user.store)
         # Fix
         context['max_bottles'] = 24
@@ -47,7 +52,7 @@ class PickingForm(TemplateView):
         product_photo = request.FILES.get('product_photo')
         bottles = request.POST.getlist('bottles')
         user_email = request.POST.get('user_email')
-        quantity_limit = 3
+        quantity_limit = 10
 
         ecuador_tz = pytz.timezone('America/Guayaquil')
 
@@ -137,11 +142,6 @@ class PickingForm(TemplateView):
             email_thread.start()
         except Exception as e:
             print("exception", e)
-
-        # except IntegrityError:
-        #     messages.error(
-        #         request, f'Error al crear la factura.')
-        #     return self.get(request, *args, **kwargs)
 
         return redirect('dashboard:picking_complete')
 

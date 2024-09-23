@@ -9,12 +9,13 @@ class CreateBottleForm(forms.ModelForm):
 
     class Meta:
         model = Bottle
-        fields = ['type', 'image', 'min_bottles', 'bottle_range']
+        fields = ['type', 'image', 'price', 'min_bottles', 'bottle_range']
         labels = {
             'type': 'Nombre de la Botella',
             'min_bottles': 'Mínimo de botellas',
             'bottle_range': 'Rango de botellas',
             'image': 'Fotografía de la botella',
+            'price': 'Precio de la botella',
         }
         widgets = {
             'type': forms.TextInput(attrs={
@@ -31,4 +32,5 @@ class CreateBottleForm(forms.ModelForm):
             }),
             'image': forms.FileInput(attrs={
                 'class': 'file-input file-input-primary file-input-bordered w-full rounded', 'placeholder': 'Imágen del producto'}),
+            'price': forms.TextInput(attrs={'class': 'input input-bordered input-primary w-full rounded', 'placeholder': 'Precio de la botella'}),
         }

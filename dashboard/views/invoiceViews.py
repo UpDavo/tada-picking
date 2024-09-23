@@ -75,8 +75,8 @@ class DownloadExcel(View):
             self.request, order_id=request.GET.get('names'),
             store=self.request.GET.get('store'),
             start=self.request.GET.get('start_date'),
-            end=self.request.GET.get('end_date'),
-            status=self.request.GET.get('status'))
+            end=self.request.GET.get('end_date'))
+            #status=self.request.GET.get('status'))
 
         # Crear un archivo Excel en memoria
         excel_buffer = io.BytesIO()
@@ -119,9 +119,6 @@ class UpdateInvoice(UpdateView):
         updated_bottles_data = form.cleaned_data.get('updated_bottles', None)
         order_id = form.cleaned_data.get('order_id', None)
         status = form.cleaned_data.get('status', None)
-
-        # ClientService.assignAndValidate(order_id)
-
         if status == 'approved' or status == 'approved_but_incomplete':
             ClientService.assignAndValidate(order_id)
 
@@ -134,6 +131,7 @@ class UpdateInvoice(UpdateView):
                 return self.form_invalid(form)
         invoice.save()
         return super().form_valid(form)
+        # return "nice"
 
 
 class ViewInvoice(UpdateView):

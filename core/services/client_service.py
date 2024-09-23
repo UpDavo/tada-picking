@@ -1,11 +1,12 @@
 from django.core.paginator import Paginator
-from core.models import ClientOrders, Invoice, PackRule, Stock, Bottle, BottleQuantity, Client
+from core.models import ClientOrders, Invoice, PackRule, Stock, Bottle, BottleQuantity, Client, Product
 from django.utils import timezone
 from django.db import IntegrityError, transaction
 from openpyxl import Workbook
 from django.http import HttpResponse
 from core.utils.emailThread import EmailThread
 import pytz
+from decimal import Decimal
 # from django.urls import reverse_lazy
 
 
@@ -184,6 +185,7 @@ class ClientService:
 
             # Crear una lista para almacenar las botellas y sus cantidades
             bottles_with_quantities = []
+            total = 0
 
             # Recorrer el diccionario de botellas del pedido y buscar las botellas por su ID
             for bottle_id, quantity in bottles.items():
@@ -192,56 +194,60 @@ class ClientService:
                     bottle = Bottle.objects.get(id=bottle_id)
                     quantity = int(quantity)
                     bottles_with_quantities.append(
-                        {'bottle': bottle, 'quantity': quantity})
+                        {'bottle': bottle, 'quantity': quantity, 'price': bottle.price})
+                    total = total + (bottle.price * quantity)
                 except Bottle.DoesNotExist:
                     print(f'Bottle with ID {bottle_id} does not exist')
 
             bottles_array = [
                 f"{bottle['quantity']} - {bottle['bottle']}" for bottle in bottles_with_quantities]
 
+            total_decimal = Decimal(total)
+            product = Product.objects.filter(price=total_decimal).first()
+
             # Reglas (PackRules)
-            rules = PackRule.objects.all()
+            # rules = PackRule.objects.all()
 
             # Variable para almacenar la primera regla coincidente
-            selected_rule = None
+            # selected_rule = None
 
             # Recorrer todas las PackRules y detenerse cuando se encuentre la primera coincidencia
-            for rule in rules:
-                rule_bottles = BottleQuantity.objects.filter(pack_rule=rule)
+            # for rule in rules:
+            #     rule_bottles = BottleQuantity.objects.filter(pack_rule=rule)
 
-                match = True
-                for order_bottle in bottles_with_quantities:
-                    # Verificar si la botella del pedido coincide con la botella de la regla
-                    matching_bottle = rule_bottles.filter(
-                        bottle=order_bottle['bottle']).first()
-                    if not matching_bottle or matching_bottle.quantity != order_bottle['quantity']:
-                        match = False
-                        break
+            #     match = True
+            #     for order_bottle in bottles_with_quantities:
+            #         # Verificar si la botella del pedido coincide con la botella de la regla
+            #         matching_bottle = rule_bottles.filter(
+            #             bottle=order_bottle['bottle']).first()
+            #         if not matching_bottle or matching_bottle.quantity != order_bottle['quantity']:
+            #             match = False
+            #             break
 
-                if match:
-                    selected_rule = rule
-                    break
+            #     if match:
+            #         selected_rule = rule
+            #         break
 
             # Si se encuentra una regla coincidente, procesar el stock y enviar el email
-            if selected_rule:
+            if product:
                 print(
-                    f'Regla coincidente para el pedido {order_id}: {selected_rule.name} (Producto: {selected_rule.product.name})')
+                    f'Producto para el pedido {order_id}: {product.name}')
 
                 product_stock = Stock.objects.filter(
-                    product=selected_rule.product).first()
+                    product=product).first()
 
                 if product_stock and product_stock.quantity > 0:
-                    # Asignar el código del stock a la orden
-                    print(product_stock.code)
-                    order.assigned_code = product_stock.code
-                    order.is_confirmed = 'confirmed'
+                    # # Asignar el código del stock a la orden
+                    # print(product_stock.code)
+                    # order.assigned_code = product_stock.code
+                    # order.is_confirmed = 'confirmed'
 
-                    # Decrementar la cantidad en el stock
-                    product_stock.quantity -= 1
-                    if product_stock.quantity == 0:
-                        product_stock.delete()
-                    else:
-                        product_stock.save()
+                    # # Decrementar la cantidad en el stock
+                    # product_stock.quantity -= 1
+                    # if product_stock.quantity == 0:
+                    #     product_stock.delete()
+                    # else:
+                    #     product_stock.save()
 
                     # Enviar email si el cliente tiene email
                     if client.email:
@@ -250,7 +256,7 @@ class ClientService:
                             'nombre': client.name,
                             'order_id': invoice.order_id,
                             'code':  product_stock.code,
-                            'value': selected_rule.product.name,
+                            'value': product.name,
                             'picker_name': invoice.picker.names,
                             'pick_date': formatted_date,
                             'bottles': bottles_array
@@ -272,7 +278,8 @@ class ClientService:
             else:
                 print(f'No hay reglas coincidentes para el pedido {order_id}.')
 
-        except ClientOrders.DoesNotExist:
+        except Exception as e:
+            print(e)
             # La orden con ID no existe
             return
 
