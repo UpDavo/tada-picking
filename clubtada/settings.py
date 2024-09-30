@@ -14,8 +14,7 @@ DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS = ['*']
 
 if env.bool('PROD', default=False):
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1',
-                     'tada-picking-production.up.railway.app']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1' ]
 
 CSRF_TRUSTED_ORIGINS = ['https://tada-picking-production.up.railway.app']
 
