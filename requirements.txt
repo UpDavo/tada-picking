@@ -73,7 +73,6 @@ scikit-learn==1.4.2
 scipy==1.13.0
 six==1.16.0
 SQLAlchemy==2.0.29
-sqlparse==0.4.4
 stack-data==0.6.3
 threadpoolctl==3.4.0
 tinycss2==1.2.1
