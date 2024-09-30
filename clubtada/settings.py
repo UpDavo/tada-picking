@@ -14,7 +14,8 @@ DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS = ['*']
 
 if env.bool('PROD', default=False):
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1' ]
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1',
+                     'tada-picking-production.up.railway.app']
 
 CSRF_TRUSTED_ORIGINS = ['https://tada-picking-production.up.railway.app']
 
@@ -132,7 +133,7 @@ DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
 EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
-EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False) 
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
 
 # Configuración de almacenamiento para S3
 # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
