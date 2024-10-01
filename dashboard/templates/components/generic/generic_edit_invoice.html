@@ -17,7 +17,7 @@
       <div class="grid md:grid-cols-2 grid-cols-1 gap-3 justify-items-center">
         {% for field in form %}
           {% if field.name != 'order_id' %}
-            <div class="{% if field.name in 'status approval_comment product_photo description' %}col-span-2{% endif %} w-full mt-1">
+            <div class="col-span-2 w-full mt-1">
               <label class="font-bold mb-3" for="{{ field.id_for_label }}">{{ field.label }}</label><br />
               {{ field }}
               {% if field.name == 'product_photo' and form.instance.product_photo %}
