@@ -205,30 +205,6 @@ class ClientService:
             total_decimal = Decimal(total)
             product = Product.objects.filter(price=total_decimal).first()
 
-            # Reglas (PackRules)
-            # rules = PackRule.objects.all()
-
-            # Variable para almacenar la primera regla coincidente
-            # selected_rule = None
-
-            # Recorrer todas las PackRules y detenerse cuando se encuentre la primera coincidencia
-            # for rule in rules:
-            #     rule_bottles = BottleQuantity.objects.filter(pack_rule=rule)
-
-            #     match = True
-            #     for order_bottle in bottles_with_quantities:
-            #         # Verificar si la botella del pedido coincide con la botella de la regla
-            #         matching_bottle = rule_bottles.filter(
-            #             bottle=order_bottle['bottle']).first()
-            #         if not matching_bottle or matching_bottle.quantity != order_bottle['quantity']:
-            #             match = False
-            #             break
-
-            #     if match:
-            #         selected_rule = rule
-            #         break
-
-            # Si se encuentra una regla coincidente, procesar el stock y enviar el email
             if product:
                 print(
                     f'Producto para el pedido {order_id}: {product.name}')
@@ -237,17 +213,17 @@ class ClientService:
                     product=product).first()
 
                 if product_stock and product_stock.quantity > 0:
-                    # # Asignar el código del stock a la orden
-                    # print(product_stock.code)
-                    # order.assigned_code = product_stock.code
-                    # order.is_confirmed = 'confirmed'
+                    # Asignar el código del stock a la orden
+                    print(product_stock.code)
+                    order.assigned_code = product_stock.code
+                    order.is_confirmed = 'confirmed'
 
-                    # # Decrementar la cantidad en el stock
-                    # product_stock.quantity -= 1
-                    # if product_stock.quantity == 0:
-                    #     product_stock.delete()
-                    # else:
-                    #     product_stock.save()
+                    # Decrementar la cantidad en el stock
+                    product_stock.quantity -= 1
+                    if product_stock.quantity == 0:
+                        product_stock.delete()
+                    else:
+                        product_stock.save()
 
                     # Enviar email si el cliente tiene email
                     if client.email:
