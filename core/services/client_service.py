@@ -45,7 +45,7 @@ class ClientService:
     @staticmethod
     def getOrderList(request, name):
         # Obtener todos los usuarios
-        items = ClientOrders.objects.order_by('created_at').all()
+        items = ClientOrders.objects.order_by('-created_at').all()
 
         if name:
             items = items.filter(order_number__icontains=name)
@@ -114,18 +114,12 @@ class ClientService:
     def createOrder(user_email, order_number, assigned_code=None, is_email_sended=False):
         try:
             # Obtener el cliente por CI
-            client = Client.objects.get(email=user_email)
+            client = Client.objects.filter(email=user_email).first()
 
-            # Crear una nueva instancia de ClientOrders
-            with transaction.atomic():
-                order = ClientOrders(
-                    client=client,
-                    order_number=order_number,
-                    assigned_code=assigned_code,
-                    is_email_sended=is_email_sended
-                )
-                # Guardar la orden en la base de datos
-                order.save()
+            order = ClientOrders.objects.create(client=client,
+                                                order_number=order_number,
+                                                assigned_code=assigned_code,
+                                                is_email_sended=is_email_sended)
 
             return order
         except Client.DoesNotExist:
@@ -173,87 +167,91 @@ class ClientService:
 
             order = ClientOrders.objects.filter(order_number=order_id).first()
 
-            # Verificar si la orden ya tiene un código asignado
-            if order.assigned_code:
-                return
+            if order:
 
-            invoice = Invoice.objects.filter(order_id=order_id).first()
-            client = order.client
+                # Verificar si la orden ya tiene un código asignado
+                if order.assigned_code:
+                    return
 
-            # Botellas del pedido
-            bottles = invoice.bottles
+                invoice = Invoice.objects.filter(order_id=order_id).first()
+                client = order.client
 
-            # Crear una lista para almacenar las botellas y sus cantidades
-            bottles_with_quantities = []
-            total = 0
+                # Botellas del pedido
+                bottles = invoice.bottles
 
-            # Recorrer el diccionario de botellas del pedido y buscar las botellas por su ID
-            for bottle_id, quantity in bottles.items():
-                try:
-                    # Buscar la instancia de Bottle por su ID y convertir la cantidad a entero
-                    bottle = Bottle.objects.get(id=bottle_id)
-                    quantity = int(quantity)
-                    bottles_with_quantities.append(
-                        {'bottle': bottle, 'quantity': quantity, 'price': bottle.price})
-                    total = total + (bottle.price * quantity)
-                except Bottle.DoesNotExist:
-                    print(f'Bottle with ID {bottle_id} does not exist')
+                # Crear una lista para almacenar las botellas y sus cantidades
+                bottles_with_quantities = []
+                total = 0
 
-            bottles_array = [
-                f"{bottle['quantity']} - {bottle['bottle']}" for bottle in bottles_with_quantities]
+                # Recorrer el diccionario de botellas del pedido y buscar las botellas por su ID
+                for bottle_id, quantity in bottles.items():
+                    try:
+                        # Buscar la instancia de Bottle por su ID y convertir la cantidad a entero
+                        bottle = Bottle.objects.get(id=bottle_id)
+                        quantity = int(quantity)
+                        bottles_with_quantities.append(
+                            {'bottle': bottle, 'quantity': quantity, 'price': bottle.price})
+                        total = total + (bottle.price * quantity)
+                    except Bottle.DoesNotExist:
+                        print(f'Bottle with ID {bottle_id} does not exist')
 
-            total_decimal = Decimal(total)
-            product = Product.objects.filter(price=total_decimal).first()
+                bottles_array = [
+                    f"{bottle['quantity']} - {bottle['bottle']}" for bottle in bottles_with_quantities]
 
-            if product:
-                print(
-                    f'Producto para el pedido {order_id}: {product.name}')
+                total_decimal = Decimal(total)
+                product = Product.objects.filter(price=total_decimal).first()
 
-                product_stock = Stock.objects.filter(
-                    product=product).first()
+                if product:
+                    print(
+                        f'Producto para el pedido {order_id}: {product.name}')
 
-                if product_stock and product_stock.quantity > 0:
-                    # Asignar el código del stock a la orden
-                    print(product_stock.code)
-                    order.assigned_code = product_stock.code
-                    order.is_confirmed = 'confirmed'
+                    product_stock = Stock.objects.filter(
+                        product=product).first()
 
-                    # Decrementar la cantidad en el stock
-                    product_stock.quantity -= 1
-                    if product_stock.quantity == 0:
-                        product_stock.delete()
-                    else:
-                        product_stock.save()
+                    if product_stock and product_stock.quantity > 0:
+                        # Asignar el código del stock a la orden
+                        print(product_stock.code)
+                        order.assigned_code = product_stock.code
+                        order.is_confirmed = 'confirmed'
 
-                    # Enviar email si el cliente tiene email
-                    if client.email:
-                        subject = 'Su picking de botella le ha dado un cupón'
-                        email_data = {
-                            'nombre': client.name,
-                            'order_id': invoice.order_id,
-                            'code':  product_stock.code,
-                            'value': product.name,
-                            'picker_name': invoice.picker.names,
-                            'pick_date': formatted_date,
-                            'bottles': bottles_array
-                        }
-                        recipient_list = [client.email]
-                        template = 'emails/assigned_code.html'
+                        # Decrementar la cantidad en el stock
+                        product_stock.quantity -= 1
+                        if product_stock.quantity == 0:
+                            product_stock.delete()
+                        else:
+                            product_stock.save()
 
-                        email_thread = EmailThread(
-                            subject, email_data, recipient_list, template)
+                        # Enviar email si el cliente tiene email
+                        if client.email:
+                            subject = 'Su picking de botella le ha dado un cupón'
+                            email_data = {
+                                'nombre': client.name,
+                                'order_id': invoice.order_id,
+                                'code':  product_stock.code,
+                                'value': product.name,
+                                'picker_name': invoice.picker.names,
+                                'pick_date': formatted_date,
+                                'bottles': bottles_array
+                            }
+                            recipient_list = [client.email]
+                            template = 'emails/assigned_code.html'
 
-                        try:
-                            email_thread.start()
-                            order.is_email_sended = True
-                        except Exception as e:
-                            order.is_email_sended = False
-                            print("Exception while sending email:", e)
+                            email_thread = EmailThread(
+                                subject, email_data, recipient_list, template)
 
-                    order.save()
+                            try:
+                                email_thread.start()
+                                order.is_email_sended = True
+                            except Exception as e:
+                                order.is_email_sended = False
+                                print("Exception while sending email:", e)
+
+                        order.save()
+                else:
+                    print(
+                        f'No hay reglas coincidentes para el pedido {order_id}.')
             else:
-                print(f'No hay reglas coincidentes para el pedido {order_id}.')
-
+                print("error con la orden")
         except Exception as e:
             print(e)
             # La orden con ID no existe
