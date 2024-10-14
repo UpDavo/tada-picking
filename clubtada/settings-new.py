@@ -15,10 +15,9 @@ ALLOWED_HOSTS = ['*']
 
 if env.bool('PROD', default=False):
     ALLOWED_HOSTS = ['localhost', '127.0.0.1',
-                     'tadaretorna.com.ec', 'tada-picking-production.up.railway.app']
+                     'tada-picking-production.up.railway.app']
 
-CSRF_TRUSTED_ORIGINS = ['https://tadaretorna.com.ec',
-                        'https://tada-picking-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://tada-picking-production.up.railway.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -84,12 +83,12 @@ DATABASES = {
 if env.bool('PROD', default=False):
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': env.str('DATABASE_NAME_AWS'),
-            'USER': env.str('DATABASE_USER_AWS'),
-            'PASSWORD': env.str('DATABASE_PASSWORD_AWS'),
-            'HOST': env.str('DATABASE_HOST_AWS'),
-            'PORT': env.str('DATABASE_PORT_AWS'),
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': env.str('DATABASE_NAME_BITNAMI'),
+            'HOST': env.str('DATABASE_HOST_LOCAL'),
+            'PORT': '3306',
+            'USER': env.str('DATABASE_USER_BITNAMI'),
+            'PASSWORD': env.str('DATABASE_PASSWORD_BITNAMI'),
         }
     }
 
