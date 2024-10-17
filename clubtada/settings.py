@@ -92,6 +92,16 @@ if env.bool('PROD', default=False):
             'PORT': env.str('DATABASE_PORT_AWS'),
         }
     }
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.postgresql',
+    #         'NAME': env.str('DATABASE_NAME'),
+    #         'USER': env.str('DATABASE_USER'),
+    #         'PASSWORD': env.str('DATABASE_PASSWORD'),
+    #         'HOST': env.str('DATABASE_HOST'),
+    #         'PORT': env.str('DATABASE_PORT'),
+    #     }
+    # }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -127,12 +137,21 @@ AWS_SECRET_ACCESS_KEY = env.str('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME')
 
 # Smtp
-EMAIL_BACKEND = env.str(
-    'EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+# EMAIL_BACKEND = env.str(
+#     'EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+# EMAIL_HOST = env.str('EMAIL_HOST')
+# EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+# EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+# EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+# EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
+# DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
+
+# EMAIL_BACKEND = env.str('EMAIL_BACKEND')
 EMAIL_HOST = env.str('EMAIL_HOST')
-EMAIL_PORT = env.int('EMAIL_PORT', default=587)
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
-EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+EMAIL_PORT = env.int('EMAIL_PORT')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
+EMAIL_USE_SSL=False
 EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
